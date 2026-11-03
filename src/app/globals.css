@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+/* 網站 UI 設定圖：主色系 */
+:root {
+  --paper: #f8e6c6; /* 主色 */
+  --paper-light: #fcf4e4; /* 卡片底 */
+  --paper-dark: #d9b17d; /* 輔助 */
+  --background: #ede3d1; /* 背景 */
+  --ink: #3e3a35; /* 文字 */
+  --ink-soft: #75695c;
+  --brick: #b5452b; /* 標題磚紅 */
+  --accent: #e76b3c; /* 強調 */
+  --sea: #2c8f86; /* 輔助（海綠） */
+  --sea-light: #bfe3dc;
+  --mustard: #f7b744; /* 點綴 */
+  --leaf: #6ba367; /* 成功／健康 */
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-light: var(--paper-light);
+  --color-paper-dark: var(--paper-dark);
+  --color-background: var(--background);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-brick: var(--brick);
+  --color-accent: var(--accent);
+  --color-sea: var(--sea);
+  --color-sea-light: var(--sea-light);
+  --color-mustard: var(--mustard);
+  --color-leaf: var(--leaf);
+  /* 字體：標題 jf 粉圓（Huninn）、內文思源黑體（Noto Sans TC） */
+  --font-sans: var(--font-noto-sans-tc), system-ui, sans-serif;
+  --font-display: var(--font-huninn), var(--font-noto-sans-tc), sans-serif;
+}
+
+body {
+  color: var(--ink);
+  background-color: var(--background);
+  /* 紙張斑點質感 */
+  background-image:
+    radial-gradient(circle at 20% 30%, rgb(140 100 50 / 0.07) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 80%, rgb(140 100 50 / 0.06) 0 1.5px, transparent 2.5px),
+    radial-gradient(ellipse at top left, rgb(255 250 235 / 0.7), transparent 60%),
+    radial-gradient(ellipse at bottom right, rgb(170 120 60 / 0.16), transparent 65%);
+  background-size: 37px 41px, 53px 47px, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+@layer components {
+  /* 復古紙卡：雙線框 */
+  .retro-card {
+    position: relative;
+    background: var(--paper-light);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    box-shadow:
+      inset 0 0 0 4px var(--paper-light),
+      inset 0 0 0 5.5px rgb(62 58 53 / 0.4),
+      4px 5px 0 rgb(62 58 53 / 0.16);
+  }
+
+  /* 車票：左右缺口 */
+  .ticket {
+    position: relative;
+    background: var(--paper-light);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    -webkit-mask:
+      radial-gradient(circle 12px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 12px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 12px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 12px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+
+  /* 區塊標籤（設定圖中的深色小標） */
+  .section-tag {
+    display: inline-block;
+    background: #5a3a22;
+    color: var(--paper-light);
+    border-radius: 6px 6px 6px 0;
+    padding: 0.15rem 0.75rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* 分類 Chip */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--paper-light);
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.2rem 0.85rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+
+  /* 紙膠帶 */
+  .tape {
+    position: absolute;
+    width: 72px;
+    height: 22px;
+    background: rgb(231 107 60 / 0.4);
+    border-left: 2px dashed rgb(255 255 255 / 0.5);
+    border-right: 2px dashed rgb(255 255 255 / 0.5);
+  }
+
+  /* 主視覺海報標題：只用淡淡的錯位陰影 */
+  .poster-title {
+    font-family: var(--font-chiron), var(--font-huninn), sans-serif;
+    font-weight: 900;
+    color: var(--brick);
+    letter-spacing: 0.02em;
+    text-shadow: 3px 3px 0 rgb(62 58 53 / 0.22);
+    transform: rotate(-2.5deg);
+    transform-origin: left center;
+  }
+
+  .retro-input {
+    width: 100%;
+    background: #fffaf0;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: 0.55rem 0.8rem;
+    font-size: 1.1rem;
+    color: var(--ink);
+    outline: none;
+    transition: box-shadow 0.15s;
+  }
+  .retro-input:focus {
+    box-shadow: 0 0 0 3px rgb(247 183 68 / 0.6);
+  }
+}
