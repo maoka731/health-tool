@@ -96,13 +96,13 @@ export interface WheelOption {
   source: "custom" | "catalog" | "recommended";
 }
 
-/** 選圖用的分類：便當（含超商便當）、速食、小吃、異國料理 */
-export type ImageGroup = "bento" | "fastfood" | "snack" | "global";
+/** 分類：選圖與快速加入共用（便當含超商便當） */
+export type ImageGroup = "bento" | "snack" | "fastfood" | "global";
 
 export const IMAGE_GROUPS: { id: ImageGroup; label: string }[] = [
   { id: "bento", label: "便當" },
-  { id: "fastfood", label: "速食" },
   { id: "snack", label: "小吃" },
+  { id: "fastfood", label: "速食" },
   { id: "global", label: "異國" },
 ];
 
@@ -117,6 +117,60 @@ export function imageChoices(group: ImageGroup): MealImageChoice[] {
   );
   const list = meals.map((m) => ({ src: m.image!, label: m.name }));
   return group === "bento" ? [{ src: GENERIC_MEAL_IMAGE, label: "通用便當" }, ...list] : list;
+}
+
+/** 快速加入的一個項目（預設菜單或使用者儲存的） */
+export interface QuickMeal {
+  id: string;
+  name: string;
+  image: string;
+  group: ImageGroup;
+  /** 使用者自己儲存的（可刪除） */
+  custom?: boolean;
+}
+
+/** 快速加入的預設菜單 */
+export const QUICK_PRESETS: QuickMeal[] = [
+  { id: "q-healthy-box", name: "健康餐盒", image: img("salmon-bento"), group: "bento" },
+  { id: "q-classic-bento", name: "傳統便當", image: img("teriyaki-chicken-bento"), group: "bento" },
+  { id: "q-buffet", name: "自助餐", image: img("cvs-mapo-tofu"), group: "bento" },
+
+  { id: "q-beef-noodle", name: "牛肉麵", image: img("beef-noodle"), group: "snack" },
+  { id: "q-braised-pork-rice", name: "滷肉飯", image: img("braised-pork-rice"), group: "snack" },
+  { id: "q-bawan", name: "肉圓", image: img("bawan"), group: "snack" },
+  { id: "q-tianbula", name: "甜不辣", image: img("tianbula"), group: "snack" },
+  { id: "q-meatball-noodle", name: "貢丸湯麵", image: img("meatball-noodle"), group: "snack" },
+
+  { id: "q-burger", name: "單點漢堡／主食", image: img("chicken-burger-set"), group: "fastfood" },
+  { id: "q-combo", name: "速食套餐", image: img("burger-set"), group: "fastfood" },
+  { id: "q-fried-chicken", name: "炸雞", image: img("fried-chicken-set"), group: "fastfood" },
+  { id: "q-pizza", name: "披薩", image: img("pizza-set"), group: "fastfood" },
+  { id: "q-hotdog", name: "熱狗", image: img("hotdog-set"), group: "fastfood" },
+
+  { id: "q-sushi", name: "壽司", image: img("sushi"), group: "global" },
+  { id: "q-tofu-stew", name: "豆腐鍋", image: img("kr-tofu-stew"), group: "global" },
+  { id: "q-pasta", name: "義大利麵", image: img("pasta"), group: "global" },
+  { id: "q-pho", name: "越南河粉", image: img("pho"), group: "global" },
+  { id: "q-udon", name: "烏龍麵", image: img("udon"), group: "global" },
+  { id: "q-bulgogi-rice", name: "烤肉拌飯", image: img("kr-bulgogi-rice"), group: "global" },
+];
+
+/** 從快速加入的預設菜單隨機挑出 count 個，做成轉盤選項 */
+export function randomPresetOptions(count = 3): WheelOption[] {
+  const pool = [...QUICK_PRESETS];
+  const picked: QuickMeal[] = [];
+  while (picked.length < count && pool.length > 0) {
+    picked.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  }
+  return picked.map((m) => ({ id: newOptionId("preset"), name: m.name, image: m.image, source: "catalog" }));
+}
+
+/** 依圖片路徑找出它屬於哪個分類（使用者儲存時用來決定放在哪個分頁） */
+export function groupOfImage(src: string): ImageGroup {
+  if (src === GENERIC_MEAL_IMAGE) return "bento";
+  const meal = MEAL_CATALOG.find((m) => m.image === src);
+  if (!meal) return "bento";
+  return meal.category === "cvs" || meal.category === "bento" ? "bento" : (meal.category as ImageGroup);
 }
 
 let seq = 0;
