@@ -20,7 +20,7 @@ export default function SiteFooter() {
     <footer className="mx-auto mt-16 w-full max-w-6xl px-4 pb-4 sm:px-6">
       <div className="relative overflow-hidden rounded-xl border-2 border-ink bg-paper-light shadow-[3px_4px_0_rgb(62_58_53/0.15)]">
         <div className="relative flex flex-col gap-5 px-5 py-6 xl:flex-row xl:items-center xl:gap-5 xl:pr-[300px]">
-          <BrandLogo className="h-12 w-auto sm:h-[52px]" />
+          <BrandLogo className="h-12 w-auto shrink-0 self-start sm:h-[52px] xl:self-center" />
           <span className="hidden h-10 w-px bg-ink/30 xl:block" />
           {/* 連結頁面尚未建立，先以純文字呈現 */}
           <ul className="flex flex-wrap items-center gap-y-2 text-sm font-medium whitespace-nowrap text-ink xl:flex-nowrap">

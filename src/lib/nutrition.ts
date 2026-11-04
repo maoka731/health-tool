@@ -7,15 +7,17 @@ export interface ActivityLevel {
   id: string;
   label: string;
   hint: string;
+  /** 精簡版表單用的短說明 */
+  short: string;
   factor: number;
 }
 
 export const ACTIVITY_LEVELS: ActivityLevel[] = [
-  { id: "sedentary", label: "久坐少動", hint: "辦公室工作、幾乎不運動", factor: 1.2 },
-  { id: "light", label: "輕度活動", hint: "每週運動 1–3 天", factor: 1.375 },
-  { id: "moderate", label: "中度活動", hint: "每週運動 3–5 天", factor: 1.55 },
-  { id: "active", label: "高度活動", hint: "每週運動 6–7 天", factor: 1.725 },
-  { id: "athlete", label: "非常活躍", hint: "勞力工作或每天高強度訓練", factor: 1.9 },
+  { id: "sedentary", label: "久坐少動", hint: "辦公室工作、幾乎不運動", short: "幾乎不運動", factor: 1.2 },
+  { id: "light", label: "輕度活動", hint: "每週運動 1–3 天", short: "每週 1–3 天", factor: 1.375 },
+  { id: "moderate", label: "中度活動", hint: "每週運動 3–5 天", short: "每週 3–5 天", factor: 1.55 },
+  { id: "active", label: "高度活動", hint: "每週運動 6–7 天", short: "每週 6–7 天", factor: 1.725 },
+  { id: "athlete", label: "非常活躍", hint: "勞力工作或每天高強度訓練", short: "每天高強度", factor: 1.9 },
 ];
 
 /**

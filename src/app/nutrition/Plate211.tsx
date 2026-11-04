@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { MACRO_RATIO, roundHalf, vegetableServings, type NutritionResult } from "@/lib/nutrition";
 import Image from "next/image";
 
@@ -16,148 +15,159 @@ const COLORS = {
   oil: { strong: "#2c8f86" },
 };
 
-/** 211 餐盤：蔬菜 2、蛋白質 1、全穀 1 */
+const MEALS = 3;
+
+/** 211 餐盤：蔬菜 2、蛋白質 1、全穀 1。四格顯示「一餐」份量，底部顯示一天總量 */
 export default function Plate211({ result }: { result: NutritionResult }) {
   const { macros, exchange, tdee } = result;
   const veg = vegetableServings(tdee);
+  const meal = (n: number) => n / MEALS;
 
   return (
-    <div className="retro-card px-5 pt-6 pb-6 sm:px-8">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h2 className="font-display text-2xl text-brick sm:text-3xl">你的每日 211 餐盤</h2>
-        <span className="text-sm text-ink-soft">
+    <div className="retro-card px-3 pt-5 pb-5 min-[400px]:px-4 sm:px-6">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 className="flex items-baseline gap-2 font-display text-2xl text-brick sm:text-3xl">
+          你的 211 餐盤
+          <span className="chip -translate-y-1 border-ink/70 bg-mustard/40 font-sans text-sm text-ink">每一餐</span>
+        </h2>
+        <span className="text-xs text-ink-soft sm:text-sm">
           醣類 {MACRO_RATIO.carbs * 100}%・蛋白質 {MACRO_RATIO.protein * 100}%・脂肪 {MACRO_RATIO.fat * 100}%
         </span>
       </div>
-      <p className="mt-1 text-sm text-ink-soft">每餐依「蔬菜 2：蛋白質 1：全穀 1」裝盤，一天吃下來大約是：</p>
 
-      <div className="mt-6 grid items-center gap-8 xl:grid-cols-[minmax(0,300px)_1fr]">
+      <div className="mt-4 grid items-center gap-5 md:grid-cols-[220px_1fr] xl:grid-cols-[250px_1fr]">
         <PlateGraphic />
 
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-          <Row
+        <ul className="grid grid-cols-2 gap-2 min-[400px]:gap-2.5 sm:gap-3">
+          <FoodTile
             color={COLORS.veg.strong}
-            icon={<FoodThumb src="/images/food-veg.jpg" />}
+            tint={COLORS.veg.fill}
+            image="/images/food-veg.jpg"
             name="蔬菜"
             ratio="2"
-            main={
-              <>
-                至少 <Big color={COLORS.veg.strong}>{veg}</Big> 份
-                <span className="text-ink-soft">（煮熟約 {half(veg / 2)} 碗），多吃不設限</span>
-              </>
-            }
-            sub="1 份 ≈ 生重 100 克 ≈ 煮熟半碗，深色蔬菜佔一半以上更好"
+            amount={`${half(meal(veg))}+`}
+            unit="份"
+            detail={`煮熟約 ${half(meal(veg) / 2)} 碗以上`}
+            note="裝滿半個盤子，多吃不設限"
           />
-          <Row
+          <FoodTile
             color={COLORS.protein.strong}
-            icon={<FoodThumb src="/images/food-protein.jpg" />}
+            tint={COLORS.protein.fill}
+            image="/images/food-protein.jpg"
             name="豆魚蛋肉"
             ratio="1"
-            main={
-              <>
-                蛋白質 <Big color={COLORS.protein.strong}>{fmt(macros.protein.grams)}</Big> 克 ≈{" "}
-                <strong>{half(exchange.eggs)}</strong> 顆蛋
-              </>
-            }
-            sub={
-              <>或約 {half(exchange.drumsticks)} 片手掌大雞腿排（1 片約 105 克）</>
-            }
+            amount={half(meal(exchange.drumsticks))}
+            unit="片雞腿排"
+            detail={`蛋白質 ${fmt(meal(macros.protein.grams))} 克`}
+            note={`也可以換算成 ${half(meal(exchange.eggs))} 顆蛋`}
           />
-          <Row
+          <FoodTile
             color={COLORS.grain.strong}
-            icon={<FoodThumb src="/images/food-grain.jpg" />}
+            tint={COLORS.grain.fill}
+            image="/images/food-grain.jpg"
             name="全穀雜糧"
             ratio="1"
-            main={
-              <>
-                醣類 <Big color={COLORS.grain.strong}>{fmt(macros.carbs.grams)}</Big> 克 ≈{" "}
-                <strong>{half(exchange.riceBowls)}</strong> 碗飯
-              </>
-            }
-            sub="1 碗飯 ≈ 醣類 60 克；蔬果奶類也有醣類，實際飯量可再少一點"
+            amount={half(meal(exchange.riceBowls))}
+            unit="碗飯"
+            detail={`醣類 ${fmt(meal(macros.carbs.grams))} 克`}
+            note="1 碗 ≈ 60 克；蔬果奶也含醣"
           />
-          <Row
+          <FoodTile
             color={COLORS.oil.strong}
-            icon={<OilBadge />}
+            tint="#cfe7e3"
             name="油脂"
             ratio="＋"
-            main={
-              <>
-                脂肪 <Big color={COLORS.oil.strong}>{fmt(macros.fat.grams)}</Big> 克 ≈{" "}
-                <strong>{half(exchange.oilTeaspoons)}</strong> 茶匙油
-              </>
-            }
-            sub="1 茶匙油 ≈ 5 克 ≈ 5 粒杏仁果；肉類和蛋也含油，烹調用油可少一些"
+            amount={half(meal(exchange.oilTeaspoons))}
+            unit="茶匙油"
+            detail={`脂肪 ${fmt(meal(macros.fat.grams))} 克`}
+            note="肉和蛋也含油，烹調可少用"
           />
         </ul>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-2 border-t-2 border-dashed border-ink/25 pt-4 text-sm">
-        <span className="chip border-ink/60 bg-mustard/25">一餐約</span>
-        <span>
-          蔬菜裝滿半盤・飯約 {half(exchange.riceBowls / 3)} 碗・蛋白質約 {half(exchange.eggs / 3)} 份（≈ {half(exchange.eggs / 3)} 顆蛋的量）
-        </span>
-        <span className="text-ink-soft">（以一天三餐平均）</span>
+      {/* 一天總量 */}
+      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border-2 border-dashed border-ink/30 bg-paper/50 px-3 py-2.5">
+        <span className="chip shrink-0 border-ink/70 bg-sea-light/60">一天總共</span>
+        <MealItem image="/images/food-veg.jpg" text={`蔬菜 ${half(veg / 2)} 碗以上`} />
+        <MealItem image="/images/food-protein.jpg" text={`蛋白質 ${half(exchange.eggs)} 份`} />
+        <MealItem image="/images/food-grain.jpg" text={`飯 ${half(exchange.riceBowls)} 碗`} />
+        <MealItem text={`油 ${half(exchange.oilTeaspoons)} 茶匙`} />
+        <span className="text-xs text-ink-soft">（以一天三餐計算）</span>
       </div>
     </div>
   );
 }
 
-function Big({ color, children }: { color: string; children: ReactNode }) {
-  return (
-    <span className="font-display text-2xl" style={{ color }}>
-      {children}
-    </span>
-  );
-}
-
-function Row({
+function FoodTile({
   color,
-  icon,
+  tint,
+  image,
   name,
   ratio,
-  main,
-  sub,
+  amount,
+  unit,
+  detail,
+  note,
 }: {
   color: string;
-  icon: ReactNode;
+  tint: string;
+  image?: string;
   name: string;
   ratio: string;
-  main: ReactNode;
-  sub: ReactNode;
+  amount: string;
+  unit: string;
+  detail: string;
+  note: string;
 }) {
   return (
-    <li className="flex items-center gap-3 rounded-xl border-2 border-ink/15 bg-white/50 px-3 py-2.5">
-      <div className="shrink-0">{icon}</div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span
-            className="flex h-6 w-6 items-center justify-center rounded-full font-display text-sm text-white"
-            style={{ backgroundColor: color }}
-          >
-            {ratio}
+    <li className="flex flex-col overflow-hidden rounded-xl border-2 border-ink bg-[#fffaf0] shadow-[2px_3px_0_rgb(62_58_53/0.15)]">
+      <div className="flex items-center gap-1.5 border-b-2 border-dashed border-ink/25 px-2 py-1.5 sm:gap-2 sm:px-2.5" style={{ backgroundColor: tint }}>
+        {image ? (
+          <span className="relative block h-6 w-6 shrink-0 overflow-hidden rounded-full border-2 border-ink sm:h-7 sm:w-7">
+            <Image src={image} alt="" fill sizes="28px" className="object-cover" />
           </span>
-          <span className="font-bold">{name}</span>
+        ) : (
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-mustard/80 font-display text-xs sm:h-7 sm:w-7 sm:text-sm">
+            油
+          </span>
+        )}
+        <span className="text-[13px] font-bold whitespace-nowrap sm:text-sm">{name}</span>
+        <span
+          className="ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-display text-xs text-white"
+          style={{ backgroundColor: color }}
+          title={`211 比例：${ratio}`}
+        >
+          {ratio}
+        </span>
+      </div>
+      <div className="flex flex-1 flex-col px-2 pt-1.5 pb-2 sm:px-2.5">
+        <div className="flex items-baseline gap-1 whitespace-nowrap">
+          <span className="text-xs text-ink-soft">約</span>
+          <span className="font-display text-[1.7rem] leading-none min-[400px]:text-3xl sm:text-4xl" style={{ color }}>
+            {amount}
+          </span>
+          <span className="text-[13px] font-bold min-[400px]:text-sm">{unit}</span>
         </div>
-        <div className="mt-0.5 leading-snug">{main}</div>
-        <div className="mt-0.5 text-xs leading-relaxed text-ink-soft">{sub}</div>
+        <div className="mt-1 text-xs font-medium text-ink">{detail}</div>
+        <div className="mt-0.5 text-[11px] leading-snug text-ink-soft">{note}</div>
       </div>
     </li>
   );
 }
 
-function FoodThumb({ src }: { src: string }) {
+function MealItem({ image, text }: { image?: string; text: string }) {
   return (
-    <span className="relative block h-14 w-14 overflow-hidden rounded-full border-2 border-ink shadow-[2px_2px_0_rgb(62_58_53/0.2)]">
-      <Image src={src} alt="" fill sizes="56px" className="object-cover" />
-    </span>
-  );
-}
-
-function OilBadge() {
-  return (
-    <span className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-ink bg-mustard/70 font-display text-xl text-ink shadow-[2px_2px_0_rgb(62_58_53/0.2)]">
-      油
+    <span className="flex items-center gap-1.5 text-sm font-medium">
+      {image ? (
+        <span className="relative block h-6 w-6 shrink-0 overflow-hidden rounded-full border-[1.5px] border-ink">
+          <Image src={image} alt="" fill sizes="24px" className="object-cover" />
+        </span>
+      ) : (
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-ink bg-mustard/80 font-display text-xs">
+          油
+        </span>
+      )}
+      {text}
     </span>
   );
 }
@@ -173,7 +183,7 @@ function PlateGraphic() {
   return (
     <svg
       viewBox="0 0 300 300"
-      className="mx-auto w-full max-w-[320px]"
+      className="mx-auto w-full max-w-[260px]"
       role="img"
       aria-label="211 餐盤：一半蔬菜、四分之一蛋白質、四分之一全穀"
     >

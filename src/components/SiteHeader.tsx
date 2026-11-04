@@ -42,7 +42,7 @@ export default function SiteHeader() {
       <div className="rounded-xl border-2 border-ink bg-paper-light/95 shadow-[3px_4px_0_rgb(62_58_53/0.15)] backdrop-blur">
         <div className="flex items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 xl:px-6">
           <Link href="/" onClick={() => setOpen(false)} className="shrink-0">
-            <BrandLogo className="h-9 w-auto min-[400px]:h-11" />
+            <BrandLogo className="h-9 w-auto shrink-0 min-[400px]:h-11" />
           </Link>
 
           <span className="hidden h-9 w-px bg-ink/30 xl:block" />
