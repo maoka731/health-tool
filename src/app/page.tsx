@@ -30,7 +30,7 @@ export default function Home() {
         </Link>
       </StationHero>
 
-      <section className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+      <section className="mt-10 grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 sm:gap-6 lg:grid-cols-4">
         {ENTRIES.map((e) => {
           const body = (
             <>

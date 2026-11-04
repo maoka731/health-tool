@@ -60,7 +60,7 @@ export default function NutritionCalculator() {
 
   return (
     <div
-      className={`mt-10 grid gap-8 ${submitted ? "lg:grid-cols-12" : "mx-auto max-w-xl"}`}
+      className={`mt-16 grid gap-8 ${submitted ? "lg:grid-cols-12" : "mx-auto max-w-xl"}`}
     >
       {/* 輸入：筆記本 */}
       <section className={submitted ? "lg:col-span-4" : ""}>
@@ -82,7 +82,11 @@ export default function NutritionCalculator() {
             {submitted ? "改改看，右邊結果會跟著變喔！" : "填好你的資料，小主廚幫你配一份今日菜單。"}
           </p>
 
-          <div className={`space-y-5 ${submitted ? "" : "sm:grid sm:grid-cols-2 sm:gap-x-4 sm:space-y-0 sm:gap-y-5"}`}>
+          <div
+            className={`space-y-5 sm:grid sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5 sm:space-y-0 ${
+              submitted ? "lg:block lg:space-y-5" : ""
+            }`}
+          >
             <Field label="性別" error={showErrors && !sex ? "請選擇性別" : undefined}>
               <div className="grid grid-cols-2 gap-2">
                 {(["female", "male"] as const).map((s) => (
@@ -105,9 +109,9 @@ export default function NutritionCalculator() {
             <NumberField label="身高" unit="公分" placeholder="例如 160" value={height} onChange={setHeight} limits={LIMITS.height} step="0.1" showErrors={showErrors} />
             <NumberField label="體重" unit="公斤" placeholder="例如 55" value={weight} onChange={setWeight} limits={LIMITS.weight} step="0.1" showErrors={showErrors} />
 
-            <div className={submitted ? "" : "sm:col-span-2"}>
+            <div className="sm:col-span-2">
               <Field label="活動量" error={showErrors && !activity ? "請選擇活動量" : undefined}>
-                <div className={`grid gap-2 ${submitted ? "" : "sm:grid-cols-2"}`}>
+                <div className={`grid gap-2 sm:grid-cols-2 ${submitted ? "lg:grid-cols-1" : ""}`}>
                   {ACTIVITY_LEVELS.map((a) => (
                     <label
                       key={a.id}

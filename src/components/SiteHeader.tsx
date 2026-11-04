@@ -40,9 +40,9 @@ export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 mx-auto w-full max-w-6xl px-4 pt-3 sm:px-6">
       <div className="rounded-xl border-2 border-ink bg-paper-light/95 shadow-[3px_4px_0_rgb(62_58_53/0.15)] backdrop-blur">
-        <div className="flex items-center gap-4 px-4 py-2.5 xl:px-6">
+        <div className="flex items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 xl:px-6">
           <Link href="/" onClick={() => setOpen(false)} className="shrink-0">
-            <BrandLogo height={44} />
+            <BrandLogo className="h-9 w-auto min-[400px]:h-11" />
           </Link>
 
           <span className="hidden h-9 w-px bg-ink/30 xl:block" />
@@ -56,7 +56,7 @@ export default function SiteHeader() {
 
           <span className="hidden h-9 w-px bg-ink/30 xl:block" />
 
-          <div className="ml-auto flex items-center gap-1 xl:ml-0">
+          <div className="ml-auto flex items-center gap-0.5 sm:gap-1 xl:ml-0">
             <IconButton label="搜尋（即將開放）">
               <SearchIcon />
             </IconButton>
