@@ -124,7 +124,7 @@ export default function NutritionCalculator() {
 
               <div className="mt-4 flex items-center gap-2 rounded-xl bg-mustard/20 px-3 py-2 text-sm text-ink">
                 <Image src="/images/mascot-face-happy.png" alt="" width={76} height={64} className="h-8 w-auto shrink-0" />
-                改改看數字，右邊結果會即時更新喔！
+                改改看數字，結果會即時更新喔！
               </div>
             </>
           ) : (
