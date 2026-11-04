@@ -4,6 +4,7 @@ import StationHero from "@/components/StationHero";
 
 const ENTRIES = [
   { title: "營養計算", desc: ["算出 BMI、TDEE", "換成幾碗飯、幾顆蛋"], icon: "/images/icon-notebook.png", w: 97, h: 68, href: "/nutrition" },
+  { title: "午餐抽籤", desc: ["選擇困難？", "轉盤幫你決定"], icon: "/images/icon-wheel.png", w: 147, h: 153, href: "/lunch" },
   { title: "便當食譜", desc: ["簡單好做的", "健康菜單"], icon: "/images/icon-bento.png", w: 93, h: 63 },
   { title: "食材圖鑑", desc: ["認識食材營養", "與黃金搭配"], icon: "/images/icon-crate.png", w: 88, h: 66 },
   { title: "主題特輯", desc: ["依季節・情境", "規劃特色便當"], icon: "/images/icon-flag.png", w: 68, h: 62 },
@@ -30,7 +31,7 @@ export default function Home() {
         </Link>
       </StationHero>
 
-      <section className="mt-10 grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+      <section className="mt-10 grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 sm:gap-6 lg:grid-cols-5">
         {ENTRIES.map((e) => {
           const body = (
             <>

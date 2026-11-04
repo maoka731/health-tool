@@ -15,6 +15,7 @@ import {
   RecipeIcon,
   ScaleIcon,
   SearchIcon,
+  WheelIcon,
 } from "./NavIcons";
 
 interface NavItem {
@@ -29,6 +30,7 @@ const NAV: NavItem[] = [
   { label: "便當食譜", icon: <RecipeIcon /> },
   { label: "食材圖鑑", icon: <BasketIcon /> },
   { label: "營養計算", icon: <ScaleIcon />, href: "/nutrition" },
+  { label: "午餐抽籤", icon: <WheelIcon />, href: "/lunch" },
   { label: "營養筆記", icon: <NoteIcon /> },
   { label: "主題特輯", icon: <FlagIcon /> },
 ];

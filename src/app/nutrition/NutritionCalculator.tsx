@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   ACTIVITY_LEVELS,
   BMI_LABEL,
@@ -10,6 +10,9 @@ import {
   type Sex,
 } from "@/lib/nutrition";
 import Image from "next/image";
+import type { HealthProfile } from "@/lib/meals";
+import { STORAGE_KEYS, writeStored } from "@/lib/storage";
+import NotebookRings from "@/components/NotebookRings";
 import Plate211 from "./Plate211";
 
 const LIMITS = {
@@ -28,15 +31,12 @@ const fmt = (n: number, digits = 0) =>
   n.toLocaleString("zh-TW", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
 export default function NutritionCalculator() {
+  // 進入頁面即顯示「左：旅客資料／右：結果」雙欄，欄位預設全空
   const [sex, setSex] = useState<Sex | null>(null);
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [activityId, setActivityId] = useState<string | null>(null);
-  // 送出前只顯示表單；送出後顯示結果，並可即時調整
-  const [submitted, setSubmitted] = useState(false);
-  const [showErrors, setShowErrors] = useState(false);
-  const resultsRef = useRef<HTMLElement>(null);
 
   const ageN = parseInRange(age, LIMITS.age);
   const heightN = parseInRange(height, LIMITS.height);
@@ -48,149 +48,88 @@ export default function NutritionCalculator() {
       ? calculateNutrition({ sex, age: ageN, heightCm: heightN, weightKg: weightN, activityFactor: activity.factor })
       : null;
 
+  // 資料完整時把身體資料存在本機，之後午餐推薦等功能會讀取
   useEffect(() => {
-    if (submitted) resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [submitted]);
-
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (result) setSubmitted(true);
-    else setShowErrors(true);
-  }
+    if (!sex || !activityId || ageN === null || heightN === null || weightN === null) return;
+    const profile: HealthProfile = {
+      sex,
+      age: ageN,
+      heightCm: heightN,
+      weightKg: weightN,
+      activityId,
+      updatedAt: new Date().toISOString(),
+    };
+    writeStored(STORAGE_KEYS.healthProfile, profile);
+  }, [sex, activityId, ageN, heightN, weightN]);
 
   return (
-    <div
-      className={`mt-16 grid gap-8 ${submitted ? "lg:grid-cols-12" : "mx-auto max-w-xl"}`}
-    >
+    <div className="mt-16 grid gap-8 lg:grid-cols-12">
       {/* 輸入：筆記本 */}
-      <section className={`relative ${submitted ? "lg:col-span-4" : ""}`}>
+      <section className="relative lg:col-span-4">
         <div className="notebook-back" aria-hidden />
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e: FormEvent) => e.preventDefault()}
           noValidate
-          className={`notebook flex flex-col px-5 pt-12 pb-6 sm:px-7 ${submitted ? "lg:h-full lg:px-5" : ""}`}
+          className="notebook flex flex-col px-5 pt-12 pb-6 sm:px-7 lg:h-full lg:px-5"
         >
-          <NotebookRings compact={submitted} />
+          <NotebookRings compact />
           <Image
             src="/images/mascot.png"
             alt="健康便當小主廚"
             width={174}
             height={174}
-            className={`absolute -right-4 z-10 drop-shadow-[2px_3px_0_rgb(62_58_53/0.15)] ${
-              submitted ? "-top-12 h-24 w-24" : "-top-16 h-32 w-32"
-            }`}
+            className="absolute -top-12 -right-4 z-10 h-24 w-24 drop-shadow-[2px_3px_0_rgb(62_58_53/0.15)]"
           />
           <h2 className="mb-1 flex items-center gap-2 font-display text-2xl text-brick">
             <span className="text-mustard">★</span>旅客資料<span className="text-mustard">★</span>
           </h2>
 
-          {submitted ? (
-            <>
-              {/* 精簡版：結果出來後，表單縮小以對齊右側 */}
-              <div className="note-box mt-3 grid grid-cols-2 gap-x-3 gap-y-3 p-3 md:grid-cols-4 lg:grid-cols-2">
-                <Field icon={<PersonIcon />} label="性別">
-                  <SexToggle value={sex} onChange={setSex} compact />
-                </Field>
-                <NumberField compact icon={<CakeIcon />} label="年齡" unit="歲" value={age} onChange={setAge} limits={LIMITS.age} showErrors />
-                <NumberField compact icon={<RulerIcon />} label="身高" unit="公分" value={height} onChange={setHeight} limits={LIMITS.height} step="0.1" showErrors />
-                <NumberField compact icon={<ScaleIcon />} label="體重" unit="公斤" value={weight} onChange={setWeight} limits={LIMITS.weight} step="0.1" showErrors />
-              </div>
+          <div className="note-box mt-3 grid grid-cols-2 gap-x-3 gap-y-3 p-3 md:grid-cols-4 lg:grid-cols-2">
+            <Field icon={<PersonIcon />} label="性別">
+              <SexToggle value={sex} onChange={setSex} compact />
+            </Field>
+            <NumberField compact icon={<CakeIcon />} label="年齡" unit="歲" value={age} onChange={setAge} limits={LIMITS.age} showErrors={false} />
+            <NumberField compact icon={<RulerIcon />} label="身高" unit="公分" value={height} onChange={setHeight} limits={LIMITS.height} step="0.1" showErrors={false} />
+            <NumberField compact icon={<ScaleIcon />} label="體重" unit="公斤" value={weight} onChange={setWeight} limits={LIMITS.weight} step="0.1" showErrors={false} />
+          </div>
 
-              <div className="note-box mt-3 p-3 lg:flex lg:flex-1 lg:flex-col">
-                <FieldLabel icon={<RunIcon />} label="活動量" />
-                <div className="grid gap-1.5 sm:grid-cols-2 md:grid-cols-3 lg:flex-1 lg:auto-rows-fr lg:grid-cols-1 lg:gap-2">
-                  {ACTIVITY_LEVELS.map((a) => (
-                    <label
-                      key={a.id}
-                      title={a.hint}
-                      className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-2.5 py-1.5 text-sm transition ${
-                        activityId === a.id ? "border-ink bg-mustard/25" : "border-ink/20 bg-[#fffaf0] hover:border-ink/60"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="activity"
-                        value={a.id}
-                        checked={activityId === a.id}
-                        onChange={() => setActivityId(a.id)}
-                        className="accent-brick"
-                      />
-                      <span className="font-bold">{a.label}</span>
-                      <span className="ml-auto truncate text-xs text-ink-soft">{a.short}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+          <div className="note-box mt-3 p-3 lg:flex lg:flex-1 lg:flex-col">
+            <FieldLabel icon={<RunIcon />} label="活動量" />
+            <div className="grid gap-1.5 sm:grid-cols-2 md:grid-cols-3 lg:flex-1 lg:auto-rows-fr lg:grid-cols-1 lg:gap-2">
+              {ACTIVITY_LEVELS.map((a) => (
+                <label
+                  key={a.id}
+                  title={a.hint}
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-2.5 py-1.5 text-sm transition ${
+                    activityId === a.id ? "border-ink bg-mustard/25" : "border-ink/20 bg-[#fffaf0] hover:border-ink/60"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="activity"
+                    value={a.id}
+                    checked={activityId === a.id}
+                    onChange={() => setActivityId(a.id)}
+                    className="accent-brick"
+                  />
+                  <span className="font-bold">{a.label}</span>
+                  <span className="ml-auto truncate text-xs text-ink-soft">{a.short}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-              <div className="mt-4 flex items-center gap-2 rounded-xl bg-mustard/20 px-3 py-2 text-sm text-ink">
-                <Image src="/images/mascot-face-happy.png" alt="" width={76} height={64} className="h-8 w-auto shrink-0" />
-                改改看數字，結果會即時更新喔！
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="mb-5 text-sm text-ink-soft">填好你的資料，小主廚幫你配一份今日菜單。</p>
-
-              {/* 身體資料 */}
-              <div className="note-box space-y-4 sm:grid sm:grid-cols-2 sm:gap-x-4 sm:gap-y-4 sm:space-y-0">
-                <Field icon={<PersonIcon />} label="性別" error={showErrors && !sex ? "請選擇性別" : undefined}>
-                  <SexToggle value={sex} onChange={setSex} />
-                </Field>
-
-                <NumberField icon={<CakeIcon />} label="年齡" unit="歲" placeholder="例如 30" value={age} onChange={setAge} limits={LIMITS.age} showErrors={showErrors} />
-                <NumberField icon={<RulerIcon />} label="身高" unit="公分" placeholder="例如 160" value={height} onChange={setHeight} limits={LIMITS.height} step="0.1" showErrors={showErrors} />
-                <NumberField icon={<ScaleIcon />} label="體重" unit="公斤" placeholder="例如 55" value={weight} onChange={setWeight} limits={LIMITS.weight} step="0.1" showErrors={showErrors} />
-              </div>
-
-              <FlowArrow />
-
-              {/* 活動量 */}
-              <div className="note-box">
-                <Field icon={<RunIcon />} label="活動量" error={showErrors && !activity ? "請選擇活動量" : undefined}>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {ACTIVITY_LEVELS.map((a) => (
-                      <label
-                        key={a.id}
-                        className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 px-3 py-2 transition ${
-                          activityId === a.id ? "border-ink bg-mustard/25" : "border-ink/25 bg-[#fffaf0] hover:border-ink/60"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="activity"
-                          value={a.id}
-                          checked={activityId === a.id}
-                          onChange={() => setActivityId(a.id)}
-                          className="accent-brick"
-                        />
-                        <span className="flex-1">
-                          <span className="block font-bold">{a.label}</span>
-                          <span className="block text-xs text-ink-soft">{a.hint}</span>
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </Field>
-              </div>
-
-              <FlowArrow />
-              <button
-                type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-ink bg-brick py-3 font-display text-xl text-paper-light shadow-[3px_4px_0_#3e3a35] transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[1px_2px_0_#3e3a35]"
-              >
-                出發！看我的營養建議 →
-              </button>
-            </>
-          )}
+          <div className="mt-4 flex items-center gap-2 rounded-xl bg-mustard/20 px-3 py-2 text-sm text-ink">
+            <Image src="/images/mascot-face-happy.png" alt="" width={76} height={64} className="h-8 w-auto shrink-0" />
+            改改看數字，結果會即時更新喔！
+          </div>
         </form>
       </section>
 
-      {/* 結果：送出後才顯示 */}
-      {submitted && (
-        <section ref={resultsRef} className="scroll-mt-24 space-y-8 lg:col-span-8" aria-live="polite">
-          {result ? <Results result={result} /> : <EmptyState />}
-        </section>
-      )}
+      {/* 結果：資料填齊前顯示「準備中」 */}
+      <section className="space-y-8 lg:col-span-8" aria-live="polite">
+        {result ? <Results result={result} /> : <EmptyState />}
+      </section>
     </div>
   );
 }
@@ -314,7 +253,7 @@ function EmptyState() {
     <div className="retro-card flex min-h-64 flex-col items-center justify-center gap-3 p-8 text-center">
       <Image src="/images/mascot-face-thinking.png" alt="" width={70} height={60} />
       <p className="font-display text-xl text-brick">列車準備中…</p>
-      <p className="text-ink-soft">年齡、身高、體重要填好，結果才會重新出現喔。</p>
+      <p className="text-ink-soft">填好左邊的性別、年齡、身高、體重和活動量，小主廚就幫你算出今日營養建議。</p>
     </div>
   );
 }
@@ -397,56 +336,6 @@ function Results({ result }: { result: NutritionResult }) {
 
       <Plate211 result={result} />
     </>
-  );
-}
-
-
-/** 筆記本頂端的金屬線圈 */
-function NotebookRings({ compact }: { compact: boolean }) {
-  const rings = Array.from({ length: 9 });
-  return (
-    <div className="pointer-events-none absolute inset-x-0 -top-6 flex justify-evenly pr-24 pl-6" aria-hidden>
-      {rings.map((_, i) => (
-        <svg
-          key={i}
-          width="26"
-          height="46"
-          viewBox="0 0 26 46"
-          className={`${i >= 4 ? "hidden sm:block" : ""} ${i >= 4 && compact ? "lg:hidden" : ""} ${
-            i >= 6 && !compact ? "sm:hidden md:block" : ""
-          }`}
-        >
-          <defs>
-            <linearGradient id={`ring-${i}`} x1="0" x2="1">
-              <stop offset="0" stopColor="#8d8378" />
-              <stop offset="0.45" stopColor="#f3eee6" />
-              <stop offset="1" stopColor="#9a8f82" />
-            </linearGradient>
-          </defs>
-          {/* 後腳：從紙張上緣（y≈25）繞到後面，顏色較暗 */}
-          <path d="M7 25.5V12" fill="none" stroke="#3e3a35" strokeWidth="7" strokeLinecap="butt" />
-          <path d="M7 25.5V12" fill="none" stroke="#7d7469" strokeWidth="3.5" strokeLinecap="butt" />
-          {/* 打孔：只對準前腳 */}
-          <ellipse cx="18" cy="38.5" rx="5.5" ry="4" fill="#3e3a35" />
-          {/* 線圈上半與前腳：往下穿進孔洞 */}
-          <path d="M7 12.5a5.5 5.5 0 0 1 11 0V37" fill="none" stroke="#3e3a35" strokeWidth="7" strokeLinecap="round" />
-          <path d="M7 12.5a5.5 5.5 0 0 1 11 0V37" fill="none" stroke={`url(#ring-${i})`} strokeWidth="3.5" strokeLinecap="round" />
-          {/* 孔洞前緣蓋住前腳末端 */}
-          <path d="M12.5 38.5a5.5 4 0 0 0 11 0" fill="#3e3a35" />
-          <ellipse cx="18" cy="38" rx="3.6" ry="1.8" fill="#1f1c19" />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
-function FlowArrow() {
-  return (
-    <div className="flex justify-center py-2.5 text-ink/70" aria-hidden>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 4v15M6 13l6 6 6-6" />
-      </svg>
-    </div>
   );
 }
 

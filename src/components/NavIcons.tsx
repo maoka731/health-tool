@@ -77,3 +77,12 @@ export const CloseIcon = () => (
     <path d="M6 6l12 12M18 6L6 18" />
   </svg>
 );
+
+export const WheelIcon = () => (
+  <svg {...base}>
+    <circle cx="12" cy="12" r="8.5" />
+    <circle cx="12" cy="12" r="1.8" />
+    <path d="M12 3.5v6.7M12 13.8v6.7M3.5 12h6.7M13.8 12h6.7M6 6l4.7 4.7M13.3 13.3L18 18" />
+    <path d="M12 1.5l-1.6 2.6h3.2z" fill="currentColor" stroke="none" />
+  </svg>
+);
