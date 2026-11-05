@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BADGES,
   CATEGORY_ORDER,
@@ -20,6 +20,7 @@ import {
   type StampBook,
 } from "@/lib/missions";
 import NotebookRings from "@/components/NotebookRings";
+import { STORAGE_KEYS, useStoredState } from "@/lib/storage";
 import StationStamp, { stampTilt } from "./StationStamp";
 
 // ─────────────────────────────────────────────
@@ -311,109 +312,115 @@ function DayDetail({
 // 徽章牆：歷史以來的成就，附進度數字
 // ─────────────────────────────────────────────
 
+let pendingSeen: number | undefined;
+
 export function BadgeShelf({ stats }: { stats: BookStats }) {
+  const [seen, setSeen] = useStoredState<string[]>(STORAGE_KEYS.badgesSeen, []);
   const unlocked = BADGES.filter((b) => b.value(stats) >= b.goal).length;
+  // NEW 標籤在這次瀏覽期間保留，離開頁面時才記為已看過（下次進來就不再顯示）
+  const unlockedIds = BADGES.filter((b) => b.value(stats) >= b.goal).map((b) => b.id);
+  const latest = useRef(unlockedIds);
+  useEffect(() => {
+    latest.current = unlockedIds;
+  });
+  useEffect(() => {
+    // 開發模式的 StrictMode 會「掛載→卸載→再掛載」，延後寫入並在重新掛載時取消
+    window.clearTimeout(pendingSeen);
+    const markSeen = () =>
+      setSeen((prev) => {
+        const add = latest.current.filter((id) => !prev.includes(id));
+        return add.length ? [...prev, ...add] : prev;
+      });
+    window.addEventListener("pagehide", markSeen);
+    return () => {
+      window.removeEventListener("pagehide", markSeen);
+      pendingSeen = window.setTimeout(markSeen, 0);
+    };
+  }, [setSeen]);
   return (
     <>
-      <p className="-mt-2 mb-4 text-sm text-ink-soft">
-        已解鎖 <b className="text-ink">{unlocked}</b> / {BADGES.length} 枚・累積{" "}
+      <p className="-mt-2 mb-5 text-sm text-ink-soft">
+        已獲得 <b className="text-ink">{unlocked}</b> / {BADGES.length} 枚・累積{" "}
         <b className="text-ink">{stats.total}</b> 個章
       </p>
-      <ul className="grid grid-cols-3 gap-x-2 gap-y-5">
+      <ul className="mx-auto flex max-w-xl flex-wrap justify-center gap-y-5">
         {BADGES.map((b) => {
           const v = Math.min(b.value(stats), b.goal);
           const on = v >= b.goal;
-          const p = v / b.goal;
-          const R = 34;
-          const C = 2 * Math.PI * R;
+          const isNew = on && !seen.includes(b.id);
           return (
-            <li
-              key={b.id}
-              className="flex flex-col items-center text-center"
-              title={b.desc}
-            >
-              <span className="relative block h-20 w-20">
-                <svg viewBox="0 0 80 80" className="h-full w-full" aria-hidden>
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r={R}
-                    fill="none"
-                    stroke="rgb(62 58 53 / 0.12)"
-                    strokeWidth="5"
-                  />
-                  {!on && p > 0 && (
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r={R}
-                      fill="none"
-                      stroke={b.color}
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                      strokeDasharray={`${C * p} ${C}`}
-                      transform="rotate(-90 40 40)"
-                      opacity="0.7"
-                    />
-                  )}
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="27"
-                    fill={on ? b.color : "#e6dccb"}
-                    stroke="#3e3a35"
-                    strokeWidth="2.5"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="21"
-                    fill="none"
-                    stroke={on ? "#fbf3e2" : "#cfc3ae"}
-                    strokeWidth="1.5"
-                    strokeDasharray="2 3"
-                  />
-                  <text
-                    x="40"
-                    y="47"
-                    textAnchor="middle"
-                    fontSize={b.mark.length > 1 ? 18 : 22}
-                    fill={on ? "#fbf3e2" : "#a99c86"}
-                    style={{
-                      fontFamily: "var(--font-chiron), sans-serif",
-                      fontWeight: 900,
-                    }}
-                  >
-                    {b.mark}
-                  </text>
-                  <path
-                    d="M28 64 l-4 13 l8 -4 l4 6 l3 -13z M52 64 l4 13 l-8 -4 l-4 6 l-3 -13z"
-                    fill={on ? b.color : "#d6ccb9"}
-                    stroke="#3e3a35"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+            <li key={b.id} className="flex w-1/3 flex-col items-center px-1 text-center">
+              <span
+                role="img"
+                aria-label={`${b.name}徽章${isNew ? "，新解鎖" : on ? "，已獲得" : "，未獲得"}`}
+                className={`relative flex aspect-square w-20 items-center justify-center min-[360px]:w-24 sm:w-28 lg:w-32 ${isNew ? "badge-new" : ""}`}
+              >
+                <Image
+                  src={b.image}
+                  alt=""
+                  width={180}
+                  height={180}
+                  className={`relative max-h-full w-auto object-contain ${
+                    on
+                      ? "drop-shadow-[1px_2px_0_rgb(62_58_53/0.18)]"
+                      : "opacity-60 grayscale-[0.9] sepia-[0.15]"
+                  }`}
+                />
+                {!on && <LockMark />}
+                {isNew && (
+                  <span className="absolute -top-1 -left-2 rotate-[-10deg] rounded-full border-2 border-ink bg-mustard px-2 py-0.5 font-[family-name:var(--font-chiron)] text-[11px] font-black text-ink shadow-[0_2px_0_#3e3a35]">
+                    NEW!
+                  </span>
+                )}
               </span>
               <span
-                className={`mt-1 text-sm font-bold ${on ? "text-ink" : "text-ink-soft"}`}
+                className={`mt-2 text-[11px] leading-snug sm:text-xs ${on ? "text-ink" : "text-ink-soft"}`}
               >
-                {b.name}
-              </span>
-              <span className="text-[11px] leading-snug text-ink-soft">
                 {b.desc}
               </span>
-              <span
-                className={`mt-0.5 rounded-full px-2 text-[11px] font-bold tabular-nums ${
-                  on ? "bg-leaf/20 text-leaf" : "bg-ink/5 text-ink-soft"
-                }`}
-              >
-                {on ? "已解鎖！" : `${v} / ${b.goal} ${b.unit}`}
-              </span>
+              {on ? (
+                <span className="mt-1 rounded-full bg-leaf/20 px-2 text-[11px] font-bold text-leaf">
+                  ✔ 已獲得
+                </span>
+              ) : (
+                <span className="mt-1.5 flex w-24 flex-col items-center gap-1">
+                  <span className="h-1.5 w-full overflow-hidden rounded-full bg-ink/10">
+                    <span
+                      className="block h-full rounded-full bg-brick/70"
+                      style={{ width: `${(v / b.goal) * 100}%` }}
+                    />
+                  </span>
+                  <span className="text-[11px] font-bold text-ink-soft tabular-nums">
+                    {v} / {b.goal} {b.unit}
+                  </span>
+                </span>
+              )}
             </li>
           );
         })}
       </ul>
     </>
+  );
+}
+
+/** 未獲得：右下角的小鎖頭 */
+function LockMark() {
+  return (
+    <svg
+      viewBox="0 0 32 36"
+      className="absolute -bottom-1 left-1/2 h-7 w-auto -translate-x-1/2 drop-shadow-[0_1px_1px_rgb(62_58_53/0.25)] sm:h-8"
+      aria-hidden
+    >
+      <path
+        d="M9 15 V11 a7 7 0 0 1 14 0 V15"
+        fill="none"
+        stroke="#5e574e"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+      <rect x="4" y="14" width="24" height="19" rx="4" fill="#6f675d" stroke="#fffaf0" strokeWidth="2" paintOrder="stroke" />
+      <circle cx="16" cy="22" r="2.6" fill="#e6dccb" />
+      <rect x="15" y="23" width="2" height="5" rx="1" fill="#e6dccb" />
+    </svg>
   );
 }

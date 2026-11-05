@@ -357,3 +357,15 @@ body {
     animation: none;
   }
 }
+
+/* 新解鎖徽章：暖黃光暈呼吸 */
+@keyframes badge-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgb(244 199 107 / 0.55)); }
+  50% { filter: drop-shadow(0 0 12px rgb(244 199 107 / 0.95)); }
+}
+.badge-new {
+  animation: badge-glow 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .badge-new { animation: none; }
+}

@@ -18,7 +18,7 @@ import {
   type MissionCategory,
   type StampBook,
 } from "@/lib/missions";
-import { STORAGE_KEYS, useStoredState } from "@/lib/storage";
+import { STORAGE_KEYS, useStoredState, writeStored } from "@/lib/storage";
 import MissionCard, { CylinderBody, SlipBody } from "./MissionCard";
 import { BadgeShelf, MonthBook } from "./StampPanels";
 import { useTodayKey } from "./useToday";
@@ -162,7 +162,7 @@ export default function StampStation() {
           <Image src="/images/stamps/cloud.png" alt="" width={129} height={65} className="pointer-events-none absolute right-36 bottom-12 hidden h-7 w-auto opacity-80 lg:block" />
           <Image src="/images/stamps/bush.png" alt="" width={214} height={68} className="pointer-events-none absolute -right-2 bottom-0 hidden h-12 w-auto sm:block" />
           <div className="relative z-10 mb-5 w-full max-w-xl">
-            {drawnToday === 3 ? <NextDrawCountdown /> : <DrawHint left={3 - drawnToday} />}
+            {drawnToday > 0 ? <NextDrawCountdown left={3 - drawnToday} /> : <DrawHint left={3} />}
           </div>
         </div>
       </section>
@@ -226,8 +226,8 @@ function subscribeClock(cb: () => void) {
   return () => window.clearInterval(id);
 }
 
-/** 三支籤都抽完後：距離明天 0:00 換新籤的倒數 */
-function NextDrawCountdown() {
+/** 抽了第一支籤之後：距離明天 0:00 換新籤的倒數（還有沒抽的籤筒會一併提醒） */
+function NextDrawCountdown({ left: cylindersLeft }: { left: number }) {
   const now = useSyncExternalStore(
     subscribeClock,
     () => Math.floor(Date.now() / 1000),
@@ -241,7 +241,15 @@ function NextDrawCountdown() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border-2 border-dashed border-ink/30 bg-[#fffaf0]/90 px-4 py-2.5 text-sm text-ink">
       <Image src="/images/stamps/train.png" alt="" width={104} height={101} className="h-7 w-auto" />
-      <span className="whitespace-nowrap">今天的籤都抽完了，下一班籤</span>
+      <span className="whitespace-nowrap">
+        {cylindersLeft > 0 ? (
+          <>
+            今天還能抽 <b className="text-brick">{cylindersLeft}</b> 個籤筒・下一班籤
+          </>
+        ) : (
+          "今天的籤都抽完了，下一班籤"
+        )}
+      </span>
       <span className="whitespace-nowrap">
         還有
         <span className="mx-1.5 font-[family-name:var(--font-chiron)] text-lg font-black text-brick tabular-nums">
@@ -323,6 +331,7 @@ function TestTools({
               type="button"
               onClick={() => {
                 setBook(EMPTY_BOOK);
+                writeStored(STORAGE_KEYS.badgesSeen, null);
                 setConfirming(false);
               }}
               className="rounded-full border-2 border-brick bg-brick px-3 py-1 text-sm font-bold text-white"

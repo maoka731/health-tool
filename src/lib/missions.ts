@@ -307,22 +307,24 @@ export interface Badge {
   id: string;
   name: string;
   desc: string;
-  /** 徽章上的大字 */
-  mark: string;
-  color: string;
+  /** 徽章圖（照「成就徽章手帳風設計稿」，緞帶上已印好名稱） */
+  image: string;
   goal: number;
   value: (s: BookStats) => number;
   unit: string;
 }
 
+const badgeImg = (id: string) => `/images/badges/${id}.png`;
+
 export const BADGES: Badge[] = [
-  { id: "first", name: "首班車", desc: "蓋下第一個章", mark: "1", color: "#b5452b", goal: 1, value: (s) => s.total, unit: "章" },
-  { id: "streak3", name: "三站連發", desc: "連續 3 天集章", mark: "3", color: "#e76b3c", goal: 3, value: (s) => s.longest, unit: "天" },
-  { id: "streak7", name: "一週環島", desc: "連續 7 天集章", mark: "7", color: "#d98f1c", goal: 7, value: (s) => s.longest, unit: "天" },
-  { id: "perfect", name: "三站制霸", desc: "同一天集滿三種章", mark: "★", color: "#5a3a22", goal: 1, value: (s) => s.perfectDays, unit: "天" },
-  { id: "eat10", name: "均衡站常客", desc: "飲食章累積 10 個", mark: "食", color: MISSION_CATEGORIES.eat.color, goal: 10, value: (s) => s.byCategory.eat, unit: "章" },
-  { id: "move10", name: "元氣站常客", desc: "活動章累積 10 個", mark: "動", color: MISSION_CATEGORIES.move.color, goal: 10, value: (s) => s.byCategory.move, unit: "章" },
-  { id: "mind10", name: "舒心站常客", desc: "身心章累積 10 個", mark: "心", color: MISSION_CATEGORIES.mind.color, goal: 10, value: (s) => s.byCategory.mind, unit: "章" },
-  { id: "hard", name: "逢凶化吉", desc: "完成一支「凶」籤", mark: "凶", color: "#3e3a35", goal: 1, value: (s) => s.hardDone, unit: "支" },
-  { id: "total30", name: "月台常客", desc: "累積 30 個章", mark: "30", color: "#b5452b", goal: 30, value: (s) => s.total, unit: "章" },
+  { id: "first", name: "首班車", desc: "蓋下第一個章", image: badgeImg("first"), goal: 1, value: (s) => s.total, unit: "章" },
+  { id: "streak3", name: "三站連發", desc: "連續 3 天集章", image: badgeImg("streak3"), goal: 3, value: (s) => s.longest, unit: "天" },
+  { id: "streak7", name: "一週環島", desc: "連續 7 天集章", image: badgeImg("streak7"), goal: 7, value: (s) => s.longest, unit: "天" },
+  { id: "streak14", name: "連續紀錄", desc: "連續 14 天集章", image: badgeImg("streak14"), goal: 14, value: (s) => s.longest, unit: "天" },
+  { id: "eat", name: "飲食達標", desc: "飲食章累積 10 個", image: badgeImg("eat"), goal: 10, value: (s) => s.byCategory.eat, unit: "章" },
+  { id: "move", name: "活動達標", desc: "活動章累積 10 個", image: badgeImg("move"), goal: 10, value: (s) => s.byCategory.move, unit: "章" },
+  { id: "mind", name: "身心達標", desc: "身心章累積 10 個", image: badgeImg("mind"), goal: 10, value: (s) => s.byCategory.mind, unit: "章" },
+  { id: "perfect", name: "健康習慣", desc: "三種章集滿 3 天", image: badgeImg("perfect"), goal: 3, value: (s) => s.perfectDays, unit: "天" },
+  { id: "hard", name: "挑戰任務", desc: "完成一支「凶」籤", image: badgeImg("hard"), goal: 1, value: (s) => s.hardDone, unit: "支" },
+  { id: "total30", name: "階段成就", desc: "累積 30 個章", image: badgeImg("total30"), goal: 30, value: (s) => s.total, unit: "章" },
 ];

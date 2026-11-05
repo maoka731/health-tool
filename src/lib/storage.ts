@@ -14,6 +14,8 @@ export const STORAGE_KEYS = {
   wheelOptions: "hbe:wheel-options:v2",
   /** 健康集章站：每日任務籤與蓋章紀錄 */
   stampBook: "hbe:stamp-book:v2",
+  /** 健康集章站：已經看過（收下）的徽章，用來標示「新解鎖」 */
+  badgesSeen: "hbe:badges-seen:v1",
   /** （預留）餐食紀錄：使用者每天吃了什麼 */
   mealLog: "hbe:meal-log:v1",
   /** （預留）餐食圖鑑：使用者收藏、自建的餐點 */
