@@ -318,3 +318,42 @@ body {
     transform: translateY(-38px);
   }
 }
+
+/* 集章站：任務卡做成郵票，下緣是剪票的齒孔；外框用 drop-shadow 沿著齒孔描邊 */
+.stamp-paper {
+  --hole: 6px;
+  --gap: 16px;
+  /* 只有下緣有齒孔：上方整塊保留，下緣一排半圓缺口 */
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--hole)) no-repeat,
+    radial-gradient(circle var(--hole) at 50% 100%, #0000 96%, #000) bottom / var(--gap) calc(var(--hole) * 2) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--hole)) no-repeat,
+    radial-gradient(circle var(--hole) at 50% 100%, #0000 96%, #000) bottom / var(--gap) calc(var(--hole) * 2) repeat-x;
+}
+.stamp-outline {
+  filter: drop-shadow(1.5px 0 0 #3e3a35) drop-shadow(-1.5px 0 0 #3e3a35) drop-shadow(0 1.5px 0 #3e3a35)
+    drop-shadow(0 -1.5px 0 #3e3a35) drop-shadow(3px 4px 0 rgb(62 58 53 / 0.16));
+}
+@keyframes stick-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 60%) rotate(0deg) scale(0.8);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -22%) rotate(-8deg) scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -14%) rotate(-5deg) scale(1.1);
+  }
+}
+.stick-pop {
+  animation: stick-pop 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.3) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stick-pop {
+    animation: none;
+  }
+}

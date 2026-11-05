@@ -20,10 +20,10 @@ const notoSansTC = Noto_Sans_TC({
   preload: false,
 });
 
-// 主視覺標題：圓潤粗黑體（Chiron GoRound TC 900），呼應設定圖的粗體海報字
+// 圓潤黑體（Chiron GoRound TC）：900 用於海報標題；500／700 用於集章站籤詩的內文與副標
 const posterFont = Chiron_GoRound_TC({
   variable: "--font-chiron",
-  weight: "900",
+  weight: ["500", "700", "900"],
   subsets: ["latin"],
   preload: false,
 });

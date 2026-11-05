@@ -8,14 +8,38 @@ export type MissionCategory = "eat" | "move" | "mind";
 export const CATEGORY_ORDER: MissionCategory[] = ["eat", "move", "mind"];
 
 /** 顏色取自 UI 設定圖色票：成功綠、強調橘、輔助海綠 */
+const ART = (name: string) => `/images/stamps/art-${name}.png`;
+
 export const MISSION_CATEGORIES: Record<
   MissionCategory,
-  { label: string; station: string; color: string; deep: string; tint: string; icon: string; en: string }
+  {
+    label: string;
+    station: string;
+    color: string;
+    deep: string;
+    tint: string;
+    icon: string;
+    en: string;
+    /** 類別小圖示、籤筒、籤棒（取自任務籤 UI 素材） */
+    iconImg: string;
+    cylinder: string;
+    stick: string;
+  }
 > = {
-  eat: { label: "飲食", station: "均衡站", color: "#6ba367", deep: "#4c7f49", tint: "#d6e8c4", icon: "🥦", en: "FOOD" },
-  move: { label: "活動", station: "元氣站", color: "#e76b3c", deep: "#b5452b", tint: "#f9cdb5", icon: "👟", en: "MOVE" },
-  mind: { label: "身心", station: "舒心站", color: "#2c8f86", deep: "#1f6b64", tint: "#bfe3dc", icon: "☀️", en: "MIND" },
+  eat: {
+    label: "飲食", station: "均衡站", color: "#6ba367", deep: "#4c7f49", tint: "#d6e8c4", icon: "🥦", en: "FOOD",
+    iconImg: ART("broccoli"), cylinder: "/images/stamps/cylinder-eat.png", stick: "/images/stamps/stick-eat.png",
+  },
+  move: {
+    label: "活動", station: "元氣站", color: "#e76b3c", deep: "#b5452b", tint: "#f9cdb5", icon: "👟", en: "MOVE",
+    iconImg: ART("shoe"), cylinder: "/images/stamps/cylinder-move.png", stick: "/images/stamps/stick-move.png",
+  },
+  mind: {
+    label: "身心", station: "舒心站", color: "#2c8f86", deep: "#1f6b64", tint: "#bfe3dc", icon: "🌿", en: "MIND",
+    iconImg: ART("leaf"), cylinder: "/images/stamps/cylinder-mind.png", stick: "/images/stamps/stick-mind.png",
+  },
 };
+
 
 // ─── 籤等：越難完成的任務，籤越「凶」 ───
 
@@ -206,6 +230,11 @@ export function stampedCategories(rec: DayRecord | undefined): MissionCategory[]
  * （以「蓋章」為準；若要改成「有抽過籤」就算，只要改這個函式）
  */
 export type DayStatus = "none" | "done" | "perfect";
+
+/** 完成印章：蓋了幾種籤筒的章就是幾顆星，三種＝金色完美章 */
+export function doneStampImage(count: number) {
+  return `/images/stamps/done-${Math.min(3, Math.max(1, count))}.png`;
+}
 
 export function dayStatus(rec: DayRecord | undefined): DayStatus {
   const n = stampedCategories(rec).length;
