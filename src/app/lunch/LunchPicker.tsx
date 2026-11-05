@@ -148,18 +148,7 @@ export default function LunchPicker() {
 
   return (
     <div className="mt-6">
-      <h1 className="sr-only">午餐抽籤：今天中午該吃什麼？</h1>
-
-      {/* 手機版 banner（桌機由場景裡的告示牌當標題） */}
-      <Image
-        src="/images/lunch-banner.png"
-        alt="今天中午吃什麼？轉轉抽出美味午餐！"
-        width={2153}
-        height={439}
-        priority
-        sizes="(min-width: 1024px) 0px, 100vw"
-        className="mb-4 h-auto w-full lg:hidden"
-      />
+      <h1 className="sr-only">午餐抽籤站：今天中午該吃什麼？</h1>
 
       <LunchStage
         options={options}

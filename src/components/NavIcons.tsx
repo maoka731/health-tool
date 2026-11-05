@@ -86,3 +86,11 @@ export const WheelIcon = () => (
     <path d="M12 1.5l-1.6 2.6h3.2z" fill="currentColor" stroke="none" />
   </svg>
 );
+
+export const StampIcon = () => (
+  <svg {...base}>
+    <circle cx="12" cy="12" r="8.5" />
+    <circle cx="12" cy="12" r="5.5" strokeDasharray="2 2" />
+    <path d="M10 12l1.5 1.5L14.5 10.5" />
+  </svg>
+);

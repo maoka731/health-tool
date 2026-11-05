@@ -9,8 +9,7 @@ export const metadata: Metadata = {
 export default function NutritionPage() {
   return (
     <div className="mx-auto mt-6 w-full max-w-6xl px-4 sm:px-6">
-      {/* 不放 banner，標題保留給螢幕閱讀器與搜尋引擎 */}
-      <h1 className="sr-only">每日營養計算：今天該吃多少？</h1>
+      <h1 className="sr-only">營養計算站：輸入身高體重，算出每天該吃多少</h1>
       <NutritionCalculator />
     </div>
   );
