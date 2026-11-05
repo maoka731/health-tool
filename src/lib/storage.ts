@@ -13,7 +13,7 @@ export const STORAGE_KEYS = {
   /** 午餐抽籤轉盤上的候選餐點 */
   wheelOptions: "hbe:wheel-options:v2",
   /** 健康集章站：每日任務籤與蓋章紀錄 */
-  stampBook: "hbe:stamp-book:v1",
+  stampBook: "hbe:stamp-book:v2",
   /** （預留）餐食紀錄：使用者每天吃了什麼 */
   mealLog: "hbe:meal-log:v1",
   /** （預留）餐食圖鑑：使用者收藏、自建的餐點 */
