@@ -364,7 +364,7 @@ function StationSkeleton() {
 
 const CAROUSEL_LABELS = ["飲食籤", "活動籤", "身心籤"];
 
-/** 手機：橫向滑動（scroll-snap）＋左右箭頭＋圓點；md 以上改為三欄並排 */
+/** 手機：一次顯示一張，可左右滑動（scroll-snap）或用箭頭、圓點切換；md 以上改為三欄並排 */
 function CardCarousel({ children }: { children: ReactNode }) {
   const items = Children.toArray(children);
   const track = useRef<HTMLDivElement>(null);
@@ -399,10 +399,10 @@ function CardCarousel({ children }: { children: ReactNode }) {
       <div
         ref={track}
         onScroll={onScroll}
-        className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-[7.5%] pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-0 lg:gap-5 [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-1 pb-2 [scrollbar-width:none] md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-0 lg:gap-5 [&::-webkit-scrollbar]:hidden"
       >
         {items.map((child, i) => (
-          <div key={i} className="flex w-[85%] shrink-0 snap-center flex-col md:w-auto" aria-roledescription="slide">
+          <div key={i} className="flex w-full shrink-0 snap-center snap-always flex-col md:w-auto" aria-roledescription="slide">
             {child}
           </div>
         ))}

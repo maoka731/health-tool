@@ -53,7 +53,7 @@ export function MonthBook({ book, today }: { book: StampBook; today: Date }) {
   return (
     <div className="relative">
       <div className="notebook-back" aria-hidden />
-      <div className="notebook px-3 pt-12 pb-5 sm:px-6">
+      <div className="notebook px-2 pt-12 pb-4 sm:px-6 sm:pb-5">
         <NotebookRings compact />
         <div className="flex flex-wrap items-center justify-between gap-2 px-1">
           <h2 className="flex items-center gap-2 font-display text-2xl text-brick">
@@ -90,13 +90,13 @@ export function MonthBook({ book, today }: { book: StampBook; today: Date }) {
           </span>
         </div>
 
-        <div className="note-box p-2 sm:p-3">
-          <div className="mb-1 grid grid-cols-7 text-center text-xs font-bold text-ink-soft">
+        <div className="note-box p-1! sm:p-3!">
+          <div className="mb-1 grid grid-cols-7 pt-1 text-center text-xs font-bold text-ink-soft sm:pt-0">
             {WEEKDAY_LABELS.map((w) => (
               <span key={w}>{w}</span>
             ))}
           </div>
-          <ol className="grid grid-cols-7 gap-1">
+          <ol className="grid grid-cols-7 gap-0.5 sm:gap-1">
             {cells.map((d, i) => {
               if (!d) return <li key={`pad-${i}`} aria-hidden />;
               const key = dateKey(d);
@@ -115,14 +115,14 @@ export function MonthBook({ book, today }: { book: StampBook; today: Date }) {
                     aria-haspopup="dialog"
                     aria-pressed={isSelected}
                     aria-label={`${d.getMonth() + 1} 月 ${d.getDate()} 日${status === "perfect" ? "，完美" : status === "done" ? "，完成" : ""}`}
-                    className={`relative flex aspect-square w-full flex-col items-center justify-center rounded-lg border-2 transition ${
+                    className={`relative flex aspect-[4/5] w-full flex-col items-center justify-center rounded-lg sm:aspect-square border-2 transition ${
                       isSelected
                         ? "border-ink bg-[#fffaf0] shadow-[0_2px_0_#3e3a35]"
                         : "border-transparent hover:border-ink/30"
                     } ${status === "perfect" ? "bg-mustard/25" : status === "done" ? "bg-[#fffaf0]" : ""} disabled:cursor-default disabled:opacity-35`}
                   >
                     <span
-                      className={`absolute top-0.5 left-1 text-[10px] sm:text-xs ${
+                      className={`absolute top-0.5 left-1 z-10 text-[11px] leading-tight font-bold sm:text-xs sm:font-normal ${
                         isToday
                           ? "rounded-full bg-brick px-1 font-bold text-white"
                           : "text-ink-soft"
@@ -137,17 +137,17 @@ export function MonthBook({ book, today }: { book: StampBook; today: Date }) {
                           alt=""
                           width={240}
                           height={239}
-                          className="-mt-2 h-auto w-[62%] max-w-12"
+                          className="mt-2 h-auto w-[82%] sm:-mt-2 sm:w-[62%] sm:max-w-14"
                           style={{
                             transform: `rotate(${((d.getDate() * 37) % 24) - 12}deg)`,
                           }}
                         />
                         {/* 當天蓋了哪幾種章 */}
-                        <span className="absolute bottom-1 flex gap-0.5">
+                        <span className="absolute bottom-0.5 flex gap-0.5 sm:bottom-1">
                           {cats.map((c) => (
                             <span
                               key={c}
-                              className="h-1.5 w-1.5 rounded-full"
+                              className="h-1 w-1 rounded-full ring-1 ring-[#fffaf0] sm:h-1.5 sm:w-1.5 sm:ring-0"
                               style={{
                                 background: MISSION_CATEGORIES[c].color,
                               }}
