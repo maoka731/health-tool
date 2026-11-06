@@ -165,9 +165,11 @@ export default function NutritionCalculatorClassic({ variant = "full" }: { varia
             {showErrors && !activity && <p className="mt-1 text-xs text-brick">請選擇活動量</p>}
           </div>
 
+          {/* 活動量與按鈕之間至少留一段距離；桌機時按鈕貼齊底部 */}
+          <div className="h-6 shrink-0 lg:h-4" aria-hidden />
           <button
             type="submit"
-            className="mt-auto flex w-full items-center justify-center gap-2 rounded-full border-2 border-ink py-2.5 lg:mt-4 font-[family-name:var(--font-chiron)] text-lg font-black text-paper-light shadow-[0_3px_0_#3e3a35] outline-[1.5px] outline-offset-[-5px] outline-paper-light/70 outline-dashed transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
+            className="mt-auto flex w-full items-center justify-center gap-2 rounded-full border-2 border-ink py-2.5 font-[family-name:var(--font-chiron)] text-lg font-black text-paper-light shadow-[0_3px_0_#3e3a35] outline-[1.5px] outline-offset-[-5px] outline-paper-light/70 outline-dashed transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
             style={{ background: G }}
           >
             開始計算 <span aria-hidden>→</span>

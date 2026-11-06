@@ -293,10 +293,12 @@ body {
     transform: translateY(-38px);
   }
 }
+/* 籤詩展開：只用 2D 位移＋縮放（不用 3D rotateX）。
+   3D 變形會讓瀏覽器把籤詩拆成獨立圖層，手機版 Safari／Chrome 會因此讓外層卡片的 drop-shadow 外框消失。 */
 @keyframes slip-unfold {
   0% {
     opacity: 0;
-    transform: perspective(800px) rotateX(-70deg) translateY(-20px);
+    transform: translateY(-14px) scaleY(0.6);
   }
   100% {
     opacity: 1;

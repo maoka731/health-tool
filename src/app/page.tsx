@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ParallaxScope, Reveal } from "@/components/Parallax";
@@ -84,20 +84,36 @@ export default function Home() {
 
 // ─── 主視覺 Banner（照 UI 設定圖 v2） ─────────
 
+/** 主視覺圖：手機（640px 以下）用 2:1 的手機版，平板以上用 3:1 的寬版（art direction） */
+function HeroPicture() {
+  const common = {
+    alt: "健康列車：搭上營養列車，展開你的健康生活！小主廚捧著便當在月台迎接列車",
+    sizes: "100vw",
+    priority: true,
+  };
+  const {
+    props: { srcSet: wide },
+  } = getImageProps({ ...common, src: "/images/landing/hero-banner-v4.jpg", width: 2172, height: 724 });
+  const {
+    props: { srcSet: phone, ...rest },
+  } = getImageProps({ ...common, src: "/images/landing/hero-banner-phone.jpg", width: 1774, height: 887 });
+  return (
+    <picture>
+      <source media="(min-width: 640px)" srcSet={wide} />
+      <source srcSet={phone} />
+      {/* eslint-disable-next-line jsx-a11y/alt-text -- alt 已在 rest 內 */}
+      <img {...rest} className="absolute inset-0 h-full w-full object-cover" />
+    </picture>
+  );
+}
+
 function Hero() {
   return (
     <ParallaxScope as="section" ariaLabel="健康列車" className="w-full">
       <div className="relative aspect-[2/1] overflow-hidden border-b-2 border-ink shadow-[0_3px_0_rgb(62_58_53/0.12)] sm:aspect-[2172/724]">
         {/* 圖片比外框高一點，捲動時慢慢位移產生視差 */}
         <div className="px absolute inset-x-0 -top-[3%] -bottom-[3%]" style={px(-28)}>
-          <Image
-            src="/images/landing/hero-banner-v4.jpg"
-            alt="健康列車：搭上營養列車，展開你的健康生活！小主廚捧著便當在月台迎接列車"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-left sm:object-center"
-          />
+          <HeroPicture />
         </div>
       </div>
       <a
@@ -307,7 +323,7 @@ function LunchArt() {
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col items-center lg:max-w-[22rem]">
       <Link href="/lunch" aria-label="前往午餐大轉盤" className="group block w-full">
-      <div className="px relative" style={px(-30)}>
+      <div className="px relative" style={px(-12)}>
         <Image src="/images/landing/lunch-wheel-full.png" alt="" width={447} height={461} className="h-auto w-full transition-transform duration-500 group-hover:-rotate-2" />
         {meals.map((m, i) => (
           <Image
@@ -317,7 +333,7 @@ function LunchArt() {
             width={m.w}
             height={m.h}
             className="px absolute w-[19%] -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_3px_2px_rgb(62_58_53/0.25)]"
-            style={{ left: `${m.x}%`, top: `${m.y}%`, rotate: `${m.r}deg`, ...px(20 + i * 14) }}
+            style={{ left: `${m.x}%`, top: `${m.y}%`, rotate: `${m.r}deg`, ...px(5 + i * 3) }}
           />
         ))}
       </div>
