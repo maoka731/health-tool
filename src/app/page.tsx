@@ -87,11 +87,11 @@ export default function Home() {
 function Hero() {
   return (
     <ParallaxScope as="section" ariaLabel="健康列車" className="w-full">
-      <div className="relative aspect-[2/1] overflow-hidden border-b-2 border-ink shadow-[0_3px_0_rgb(62_58_53/0.12)] sm:aspect-[1150/274]">
+      <div className="relative aspect-[2/1] overflow-hidden border-b-2 border-ink shadow-[0_3px_0_rgb(62_58_53/0.12)] sm:aspect-[2172/724]">
         {/* 圖片比外框高一點，捲動時慢慢位移產生視差 */}
         <div className="px absolute inset-x-0 -top-[3%] -bottom-[3%]" style={px(-28)}>
           <Image
-            src="/images/landing/hero-banner-v2.png"
+            src="/images/landing/hero-banner-v4.jpg"
             alt="健康列車：搭上營養列車，展開你的健康生活！小主廚捧著便當在月台迎接列車"
             fill
             priority
