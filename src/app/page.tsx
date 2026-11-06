@@ -8,7 +8,7 @@ import { AboutTrain, ConductorAndFaq, SectionTitle, Timetable, TrainStory } from
 
 // ─────────────────────────────────────────────
 // 首頁 Landing：健康列車
-// 主視覺 Banner → 這是一班什麼樣的列車 → 三大分頁入口 → 路線導覽圖（小火車沿軌道前進）
+// 主視覺 Banner → 三大分頁入口 → 這是一班什麼樣的列車 → 路線導覽圖（小火車沿軌道前進）
 // → 時刻表 → 列車小故事 → 列車長的話＋乘車須知
 // ─────────────────────────────────────────────
 
@@ -72,8 +72,8 @@ export default function Home() {
   return (
     <div className="overflow-x-clip">
       <Hero />
-      <AboutTrain />
       <Entrances />
+      <AboutTrain />
       <Route />
       <Timetable />
       <TrainStory />

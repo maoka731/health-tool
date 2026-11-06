@@ -20,6 +20,62 @@ export function SectionTitle({ en, children, sub }: { en: string; children: Reac
   );
 }
 
+/** 背景小裝飾（從 background.png 上半部去背）：位置、大小、捲動速度各不同，形成多層視差 */
+const SKY_DECOR: { src: string; w: number; h: number; cls: string; k: number; kx?: number; kr?: number }[] = [
+  { src: "/images/landing/deco-cloud-c.png", w: 360, h: 139, cls: "top-[46%] -left-10 w-48 opacity-90 sm:w-64", k: -380, kx: 60 },
+  { src: "/images/landing/deco-cloud-a.png", w: 289, h: 81, cls: "top-[9%] left-[30%] w-40 sm:w-56", k: -300, kx: -80 },
+  { src: "/images/landing/deco-cloud-a.png", w: 289, h: 81, cls: "right-[6%] bottom-[10%] w-36 -scale-x-100 opacity-80 sm:w-48", k: -220, kx: 90 },
+  { src: "/images/landing/deco-stamp.png", w: 251, h: 164, cls: "top-6 left-3 w-28 sm:top-10 sm:left-8 sm:w-40", k: 140, kr: 10 },
+  { src: "/images/landing/deco-leaves.png", w: 498, h: 315, cls: "-top-2 -right-6 w-56 sm:w-80 lg:w-[26rem]", k: 220, kr: -6 },
+];
+
+/**
+ * 滿版風景背景區塊（reference-design/background.png）：
+ * - focus="top"：用圖片上半部的天空紙紋當底，郵票、雲朵、葉子拆成獨立圖層，各自用不同速度移動。
+ * - focus="bottom"：用整張圖的下半部（山景、月台小火車），底圖移動得比內容慢。
+ * 上下緣淡出接回紙張底色。
+ */
+function ScenicSection({
+  ariaLabel,
+  focus = "bottom",
+  children,
+}: {
+  ariaLabel: string;
+  focus?: "top" | "bottom";
+  children: ReactNode;
+}) {
+  const top = focus === "top";
+  return (
+    <ParallaxScope as="section" ariaLabel={ariaLabel} className="relative mt-16 overflow-hidden py-24 sm:py-28">
+      <div
+        className="pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,black_12%,black_88%,transparent)]"
+        aria-hidden
+      >
+        {/* 底圖：比區塊高，往反方向慢慢移動 */}
+        <div className="px absolute inset-x-0 -top-[24%] -bottom-[24%]" style={px(top ? -110 : -200)}>
+          <Image
+            src={top ? "/images/landing/scenic-paper.jpg" : "/images/landing/scenic-bg.jpg"}
+            alt=""
+            fill
+            sizes="100vw"
+            className={`object-cover ${top ? "" : "object-[82%_100%] sm:object-bottom"}`}
+          />
+        </div>
+        {/* 上半部的獨立小圖層 */}
+        {top &&
+          SKY_DECOR.map((d, i) => (
+            <div key={i} className={`px absolute ${d.cls}`} style={px(d.k, d.kx, d.kr)}>
+              <Image src={d.src} alt="" width={d.w} height={d.h} className="h-auto w-full" />
+            </div>
+          ))}
+        {/* 淡淡的紙色罩，讓前景卡片更好讀 */}
+        <div className="absolute inset-0 bg-paper-light/20" />
+      </div>
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">{children}</div>
+    </ParallaxScope>
+  );
+}
+
 // ─── 這是一班什麼樣的列車？（乘車證造型） ─────
 
 const PROMISES = [
@@ -30,7 +86,7 @@ const PROMISES = [
 
 export function AboutTrain() {
   return (
-    <ParallaxScope as="section" ariaLabel="關於健康列車" className="mx-auto mt-16 max-w-6xl px-4 sm:px-6">
+    <ScenicSection ariaLabel="關於健康列車" focus="top">
       <Reveal>
         <SectionTitle en="ABOUT THIS TRAIN">這是一班什麼樣的列車？</SectionTitle>
       </Reveal>
@@ -93,7 +149,7 @@ export function AboutTrain() {
           </div>
         </div>
       </Reveal>
-    </ParallaxScope>
+    </ScenicSection>
   );
 }
 
@@ -187,7 +243,7 @@ const CHAPTERS: { no: string; title: string; img: string; alt: string; text: str
 
 export function TrainStory() {
   return (
-    <ParallaxScope as="section" ariaLabel="列車小故事" className="mx-auto mt-24 max-w-6xl px-4 sm:px-6">
+    <ScenicSection ariaLabel="列車小故事">
       <Reveal>
         <SectionTitle en="OUR STORY" sub="關於這班列車，是怎麼開出來的">
           列車小故事
@@ -195,7 +251,7 @@ export function TrainStory() {
       </Reveal>
       <ol className="mt-10 grid gap-6 lg:grid-cols-3">
         {CHAPTERS.map((c, i) => (
-          <li key={c.no} className="px-lg" style={px(20 + i * 25)}>
+          <li key={c.no} className="px-lg" style={px(40)}>
             <Reveal delay={i * 150} className="h-full">
               <article className="relative flex h-full flex-col rounded-2xl border-2 border-ink bg-[#fffdf7] p-2 shadow-[4px_6px_0_rgb(62_58_53/0.16)]">
                 {/* 插畫 */}
@@ -221,7 +277,7 @@ export function TrainStory() {
           </li>
         ))}
       </ol>
-    </ParallaxScope>
+    </ScenicSection>
   );
 }
 
