@@ -148,7 +148,7 @@ export default function LunchPicker() {
 
   return (
     <div className="mt-6">
-      <h1 className="sr-only">午餐抽籤站：今天中午該吃什麼？</h1>
+      <h1 className="sr-only">午餐大轉盤：今天中午該吃什麼？</h1>
 
       <LunchStage
         options={options}
@@ -464,15 +464,21 @@ function ResultTicket({ result }: { result: WheelOption }) {
   return (
     <div className="ticket-drop relative">
       <div className="flex items-stretch overflow-hidden rounded-xl border-2 border-ink bg-[#fbf3e2] shadow-[3px_4px_0_rgb(62_58_53/0.25)]">
-        <div className="flex w-16 shrink-0 flex-col items-center justify-center gap-0.5 border-r-2 border-dashed border-ink/40 bg-brick text-paper-light">
-          <span className="text-[9px] tracking-[0.2em]">TODAY</span>
-          <span className="font-[family-name:var(--font-chiron)] text-lg leading-none font-black">午餐</span>
+        <div className="flex w-[4.5rem] shrink-0 flex-col items-center justify-center gap-1 border-r-2 border-dashed border-ink/40 bg-brick text-paper-light">
+          <span className="text-[11px] font-bold tracking-[0.15em]">TODAY</span>
+          <span className="font-[family-name:var(--font-chiron)] text-xl leading-none font-black">午餐</span>
         </div>
         <div className="flex min-w-0 flex-1 items-center gap-3 py-3 pr-2 pl-3">
           <Image src={optionImage(result)} alt="" width={180} height={150} className="h-16 w-20 shrink-0 object-contain min-[400px]:h-20 min-[400px]:w-24" />
           <div className="min-w-0 flex-1 pr-8">
-            <p className="text-xs tracking-[0.2em] text-ink-soft">今天午餐就吃</p>
-            <p className="poster-title rotate-0! text-2xl leading-tight break-words">{result.name}</p>
+            <p className="text-xs font-bold tracking-[0.1em] whitespace-nowrap text-ink-soft min-[360px]:text-sm min-[360px]:tracking-[0.12em]">今天午餐就吃</p>
+            <p
+              className={`poster-title rotate-0! mt-0.5 leading-tight break-words ${
+                [...result.name].length > 5 ? "text-2xl" : "text-3xl"
+              }`}
+            >
+              {result.name}
+            </p>
           </div>
         </div>
       </div>

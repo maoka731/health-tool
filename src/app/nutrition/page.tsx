@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import NutritionCalculator from "./NutritionCalculator";
 
 export const metadata: Metadata = {
-  title: "每日營養計算｜健康便當列車",
+  title: "每日營養計算｜健康列車",
   description: "輸入身高體重，算出 BMI、TDEE 與三大營養素建議攝取量，並用 211 餐盤換算成幾碗飯、幾顆蛋。",
 };
 

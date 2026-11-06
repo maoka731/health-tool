@@ -96,7 +96,7 @@ const EAT: Raw[] = [
   { id: "eat-no-sugar", difficulty: 4, title: "今天不喝含糖飲料", detail: "手搖飲、汽水、加糖咖啡都先暫停一天，改喝白開水或無糖茶。", tip: "嘴饞時試試氣泡水加檸檬片～" },
   { id: "eat-211", difficulty: 4, title: "吃一餐 211 餐盤", detail: "其中一餐照「蔬菜 2：蛋白質 1：全穀 1」的比例裝盤。", tip: "營養計算站可以幫你算份量！" },
   { id: "eat-no-snack", difficulty: 5, title: "一整天不吃零食", detail: "正餐以外不吃餅乾、糖果、洋芋片，嘴饞就吃水果或喝水。", tip: "撐過去的你超厲害！" },
-  { id: "eat-home-cook", difficulty: 5, title: "自己準備一餐", detail: "自己煮或自己組合一份健康便當，蔬菜、蛋白質、全穀都要有。", tip: "健康便當列車為你加油！" },
+  { id: "eat-home-cook", difficulty: 5, title: "自己準備一餐", detail: "自己煮或自己組合一份健康便當，蔬菜、蛋白質、全穀都要有。", tip: "健康列車為你加油！" },
 ];
 
 const MOVE: Raw[] = [

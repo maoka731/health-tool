@@ -87,7 +87,7 @@ export default function StampStation() {
 
   return (
     <div className="mt-6 space-y-10">
-      <h1 className="sr-only">健康集章站：每天抽三種任務籤，完成就蓋章</h1>
+      <h1 className="sr-only">每日任務籤：每天抽三種任務籤，完成就蓋章</h1>
 
       {/* ── 今日三籤筒 ── */}
       <section

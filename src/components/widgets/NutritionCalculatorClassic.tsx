@@ -1,5 +1,5 @@
-// 【保留備用】營養計算「進入頁面先填資料」的原始版本（填完按「出發！」才顯示結果）。
-// 之後要放到首頁當快捷元件，目前沒有任何頁面引用。
+// 營養計算「進入頁面先填資料」的原始版本（填完按「出發！」才顯示結果）。
+// variant="quick"：首頁路線導覽圖的精簡快捷版，填完按「開始計算」會帶著資料跳到營養計算頁。
 
 "use client";
 
@@ -14,7 +14,9 @@ import {
 } from "@/lib/nutrition";
 import Image from "next/image";
 import type { HealthProfile } from "@/lib/meals";
+import { useRouter } from "next/navigation";
 import { STORAGE_KEYS, writeStored } from "@/lib/storage";
+import { NUTRITION_HANDOFF_KEY } from "@/lib/nutritionHandoff";
 import NotebookRings from "@/components/NotebookRings";
 import Plate211 from "@/app/nutrition/Plate211";
 
@@ -33,7 +35,9 @@ function parseInRange(value: string, { min, max }: { min: number; max: number })
 const fmt = (n: number, digits = 0) =>
   n.toLocaleString("zh-TW", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
-export default function NutritionCalculatorClassic() {
+export default function NutritionCalculatorClassic({ variant = "full" }: { variant?: "full" | "quick" }) {
+  const quick = variant === "quick";
+  const router = useRouter();
   const [sex, setSex] = useState<Sex | null>(null);
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
@@ -74,8 +78,103 @@ export default function NutritionCalculatorClassic() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (result) setSubmitted(true);
-    else setShowErrors(true);
+    if (!result) return setShowErrors(true);
+    if (quick && sex && activityId && ageN !== null && heightN !== null && weightN !== null) {
+      // 快捷元件：存好資料，交給營養計算頁自動帶入
+      const profile: HealthProfile = { sex, age: ageN, heightCm: heightN, weightKg: weightN, activityId, updatedAt: new Date().toISOString() };
+      writeStored(STORAGE_KEYS.healthProfile, profile);
+      try {
+        window.sessionStorage.setItem(NUTRITION_HANDOFF_KEY, JSON.stringify(profile));
+      } catch {
+        // 無法使用 sessionStorage 時，營養計算頁就從空白開始
+      }
+      router.push("/nutrition");
+      return;
+    }
+    setSubmitted(true);
+  }
+
+  // ─── 首頁快捷版：精簡筆記本，配色跟「營養計算站」站牌一致（綠） ───
+  if (quick) {
+    const G = "#4c7f49";
+    return (
+      <div className="relative h-full">
+        <div className="notebook-back" aria-hidden />
+        <form onSubmit={handleSubmit} noValidate className="notebook flex h-full flex-col px-4 pt-11 pb-5 sm:px-6 lg:pt-10 lg:pb-4">
+          <NotebookRings compact />
+          <Image
+            src="/images/mascot.png"
+            alt=""
+            width={174}
+            height={174}
+            className="absolute -top-11 -right-3 z-10 h-20 w-20 drop-shadow-[2px_3px_0_rgb(62_58_53/0.15)]"
+          />
+          <div className="flex flex-wrap items-baseline gap-x-2 pr-14">
+            <h3 className="font-display text-2xl" style={{ color: G }}>
+              旅客資料
+            </h3>
+            <span className="text-xs text-ink-soft">填好就能看你的營養建議</span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3 lg:mt-2 lg:grid-cols-4 lg:gap-x-2">
+            <div>
+              <FieldLabel icon={<PersonIcon />} label="性別" />
+              <div className="grid grid-cols-2 gap-1">
+                {(["female", "male"] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setSex(v)}
+                    aria-pressed={sex === v}
+                    className={`rounded-lg border-2 border-ink py-1.5 text-base font-bold transition ${
+                      sex === v ? "text-paper-light shadow-[2px_3px_0_#3e3a35]" : "bg-[#fffaf0] text-ink hover:bg-paper"
+                    }`}
+                    style={sex === v ? { background: G } : undefined}
+                  >
+                    {v === "female" ? "女" : "男"}
+                  </button>
+                ))}
+              </div>
+              {showErrors && !sex && <p className="mt-1 text-xs text-brick">請選擇性別</p>}
+            </div>
+            <NumberField compact icon={<CakeIcon />} label="年齡" unit="歲" placeholder="30" value={age} onChange={setAge} limits={LIMITS.age} showErrors={showErrors} />
+            <NumberField compact icon={<RulerIcon />} label="身高" unit="公分" placeholder="160" value={height} onChange={setHeight} limits={LIMITS.height} step="0.1" showErrors={showErrors} />
+            <NumberField compact icon={<ScaleIcon />} label="體重" unit="公斤" placeholder="55" value={weight} onChange={setWeight} limits={LIMITS.weight} step="0.1" showErrors={showErrors} />
+          </div>
+
+          <div className="mt-3 lg:mt-2.5">
+            <FieldLabel icon={<RunIcon />} label="活動量" />
+            <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="活動量">
+              {ACTIVITY_LEVELS.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={activityId === a.id}
+                  title={a.hint}
+                  onClick={() => setActivityId(a.id)}
+                  className={`rounded-full border-2 px-2.5 py-1 text-sm font-bold transition lg:px-2 lg:text-[13px] xl:px-2.5 xl:text-sm ${
+                    activityId === a.id ? "border-ink text-paper-light" : "border-ink/25 bg-[#fffaf0] text-ink hover:border-ink/60"
+                  }`}
+                  style={activityId === a.id ? { background: G } : undefined}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
+            {showErrors && !activity && <p className="mt-1 text-xs text-brick">請選擇活動量</p>}
+          </div>
+
+          <button
+            type="submit"
+            className="mt-auto flex w-full items-center justify-center gap-2 rounded-full border-2 border-ink py-2.5 lg:mt-4 font-[family-name:var(--font-chiron)] text-lg font-black text-paper-light shadow-[0_3px_0_#3e3a35] outline-[1.5px] outline-offset-[-5px] outline-paper-light/70 outline-dashed transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
+            style={{ background: G }}
+          >
+            開始計算 <span aria-hidden>→</span>
+          </button>
+        </form>
+      </div>
+    );
   }
 
   return (

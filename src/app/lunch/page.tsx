@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import LunchPicker from "./LunchPicker";
 
 export const metadata: Metadata = {
-  title: "午餐抽籤｜健康便當列車",
+  title: "午餐大轉盤｜健康列車",
   description: "輸入想吃的餐點，轉動抽籤轉盤，讓小主廚幫你決定今天午餐吃什麼。",
 };
 

@@ -29,8 +29,8 @@ const posterFont = Chiron_GoRound_TC({
 });
 
 export const metadata: Metadata = {
-  title: "健康便當列車 Healthy Bento Express",
-  description: "用均衡營養，吃出更好的日常！",
+  title: "健康列車 Healthy Train",
+  description: "搭上營養列車，展開你的健康生活！營養計算、午餐大轉盤、每日任務籤三個小工具。",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

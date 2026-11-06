@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import type { HealthProfile } from "@/lib/meals";
 import { STORAGE_KEYS, writeStored } from "@/lib/storage";
+import { NUTRITION_HANDOFF_KEY } from "@/lib/nutritionHandoff";
 import NotebookRings from "@/components/NotebookRings";
 import Plate211 from "./Plate211";
 
@@ -47,6 +48,30 @@ export default function NutritionCalculator() {
     sex && activity && ageN !== null && heightN !== null && weightN !== null
       ? calculateNutrition({ sex, age: ageN, heightCm: heightN, weightKg: weightN, activityFactor: activity.factor })
       : null;
+
+  // 從首頁快捷計算機過來時，自動帶入剛填的資料（只帶一次）
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem(NUTRITION_HANDOFF_KEY);
+      window.sessionStorage.removeItem(NUTRITION_HANDOFF_KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const p = JSON.parse(raw) as HealthProfile;
+      /* eslint-disable react-hooks/set-state-in-effect -- 只在掛載時從 sessionStorage 帶入一次 */
+      setSex(p.sex);
+      setAge(String(p.age));
+      setHeight(String(p.heightCm));
+      setWeight(String(p.weightKg));
+      setActivityId(p.activityId);
+      /* eslint-enable react-hooks/set-state-in-effect */
+    } catch {
+      // 資料格式不對就忽略
+    }
+  }, []);
 
   // 資料完整時把身體資料存在本機，之後午餐推薦等功能會讀取
   useEffect(() => {

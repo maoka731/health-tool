@@ -65,33 +65,84 @@ function slicePath(i: number, n: number) {
  */
 const LABEL_OUTER = WHEEL.r - 26;
 const LABEL_INNER = 96; // 避開中央列車徽章
+/** 估算字寬：中日文 1、英數半形約 0.6、空白 0.35（以字級為單位） */
+const charUnit = (ch: string) => (/\s/.test(ch) ? 0.35 : /[\u0000-\u00ff]/.test(ch) ? (/[A-Z0-9]/.test(ch) ? 0.68 : 0.58) : 1);
+const widthOf = (list: string[]) => list.reduce((sum, ch) => sum + charUnit(ch), 0);
+
+/** 把名稱拆成兩行：優先在「／、・ 空白」等分隔處斷開，否則從字寬中間斷 */
+function splitTwoLines(chars: string[]): [string[], string[]] {
+  const total = widthOf(chars);
+  let best = Math.ceil(chars.length / 2);
+  let bestScore = Infinity;
+  for (let k = 1; k < chars.length; k++) {
+    const left = widthOf(chars.slice(0, k));
+    const balance = Math.abs(total / 2 - left);
+    // 斷在分隔符號後面比較自然
+    const bonus = /[／/、・·,，\s]/.test(chars[k - 1]) ? -1.6 : 0;
+    const score = balance + bonus;
+    if (score < bestScore) {
+      bestScore = score;
+      best = k;
+    }
+  }
+  const a = chars.slice(0, best);
+  const b = chars.slice(best);
+  // 斷在空白時，把行首／行尾的空白去掉
+  while (a.length && /\s/.test(a[a.length - 1])) a.pop();
+  while (b.length && /\s/.test(b[0])) b.shift();
+  return [a, b];
+}
+
+/**
+ * 轉盤格子上的名稱：沿半徑方向排字。
+ * 一行放得下就用一行；字太多時先換成兩行，兩行還是太擠才縮小字級、最後才加「…」。
+ */
 function SliceLabel({ name, i, n, rotation }: { name: string; i: number; n: number; rotation: number }) {
   const s = 360 / n;
   const mid = (i + 0.5) * s;
   const length = LABEL_OUTER - LABEL_INNER;
-  // 字高不能超過最窄處（內緣）的格寬
+  // 字高（或兩行的總高）不能超過最窄處（內緣）的格寬
   const innerChord = 2 * LABEL_INNER * Math.sin(((Math.min(s, 90) / 2) * Math.PI) / 180);
   const maxSize = Math.min(36, innerChord * 0.78);
+  const maxSize2 = Math.min(32, (innerChord * 0.82) / 2.15);
   const minSize = 17;
-  // 依字元實際寬度估算長度：中日文 1、英數半形約 0.6、空白 0.35
+  /** 單行時文字還能維持這個大小，就不換行 */
+  const comfortable = 26;
+
   const chars = [...name];
-  const unit = (ch: string) => (/\s/.test(ch) ? 0.35 : /[\u0000-\u00ff]/.test(ch) ? (/[A-Z0-9]/.test(ch) ? 0.68 : 0.58) : 1);
-  const widthOf = (list: string[]) => list.reduce((sum, ch) => sum + unit(ch), 0);
-  let shown = chars;
-  if (widthOf(chars) * minSize > length) {
-    shown = [];
-    for (const ch of chars) {
-      if ((widthOf(shown) + unit(ch) + 1) * minSize > length) break;
-      shown.push(ch);
+  const single = Math.min(maxSize, (length * 0.94) / widthOf(chars));
+
+  let lines: string[][] = [chars];
+  let fontSize = single;
+  if (single < comfortable && chars.length >= 4 && maxSize2 >= minSize) {
+    const two = splitTwoLines(chars);
+    const size2 = Math.min(maxSize2, (length * 0.94) / Math.max(widthOf(two[0]), widthOf(two[1])));
+    if (size2 > single) {
+      lines = two;
+      fontSize = size2;
     }
-    shown.push("…");
   }
-  const fontSize = r2(Math.max(minSize, Math.min(maxSize, (length * 0.94) / widthOf(shown))));
+  // 還是太擠：每一行最多放到最小字級的長度，超過的用「…」收尾
+  if (fontSize < minSize) {
+    fontSize = minSize;
+    lines = lines.map((line, li) => {
+      if (widthOf(line) * minSize <= length) return line;
+      const cut: string[] = [];
+      for (const ch of line) {
+        if ((widthOf(cut) + charUnit(ch) + 1) * minSize > length) break;
+        cut.push(ch);
+      }
+      return li === lines.length - 1 || lines.length === 1 ? [...cut, "…"] : cut;
+    });
+  }
+  fontSize = r2(fontSize);
+
   const rc = (LABEL_OUTER + LABEL_INNER) / 2;
   const p = polar(rc, mid);
   // 依「停下來時」的實際角度決定要不要翻轉，讓轉完後的字都是正的
   const screen = (((mid + rotation) % 360) + 360) % 360;
   const theta = r2(screen <= 180 ? mid - 90 : mid + 90);
+  const lineGap = 1.08; // 行距（em）
   return (
     <text
       transform={`translate(${p.x} ${p.y}) rotate(${theta})`}
@@ -105,7 +156,13 @@ function SliceLabel({ name, i, n, rotation }: { name: string; i: number; n: numb
       paintOrder="stroke"
       style={{ fontFamily: "var(--font-chiron), var(--font-huninn), sans-serif", fontWeight: 900 }}
     >
-      {shown.join("")}
+      {lines.length === 1
+        ? lines[0].join("")
+        : lines.map((line, li) => (
+            <tspan key={li} x={0} y={r2((li - (lines.length - 1) / 2) * lineGap * fontSize)}>
+              {line.join("")}
+            </tspan>
+          ))}
     </text>
   );
 }
@@ -226,7 +283,7 @@ export default function LunchStage({
 
   return (
     <section
-      aria-label="午餐抽籤轉盤"
+      aria-label="午餐大轉盤"
       className="relative overflow-hidden rounded-2xl border-2 border-ink shadow-[5px_6px_0_rgb(62_58_53/0.2)] aspect-[670/688] max-lg:mx-auto max-lg:max-w-[520px] lg:aspect-[1548/688]"
     >
       {/* 手機只露出轉盤那段（x 205–875）；桌機完整場景 */}
@@ -280,30 +337,38 @@ export default function LunchStage({
   );
 }
 
+/** 車票上餐點名稱的字級（cqw）：字少就大，字多就縮小、最多兩行 */
+function ticketNameSize(len: number) {
+  if (len <= 3) return 2.8;
+  if (len <= 4) return 2.4;
+  if (len <= 6) return 2;
+  return 1.7;
+}
+
 /** 放在桌上的車票：餐點圖＋名稱＋紅色「抽中」印章，單位用容器寬（cqw）隨場景縮放 */
 function DeskTicket({ result }: { result: WheelOption }) {
   return (
     <div className="ticket-drop h-full w-full">
       <div className="relative flex h-full w-full -rotate-[4deg] items-stretch overflow-visible rounded-[0.9cqw] border-[0.18cqw] border-ink bg-[#fbf3e2] shadow-[0.3cqw_0.45cqw_0_rgb(62_58_53/0.35)]">
         {/* 左側存根 */}
-        <div className="flex w-[22%] shrink-0 flex-col items-center justify-center gap-[0.3cqw] border-r-[0.15cqw] border-dashed border-ink/40 bg-brick text-paper-light">
-          <span className="text-[0.75cqw] tracking-[0.2em]">TODAY</span>
-          <span className="font-[family-name:var(--font-chiron)] text-[1.55cqw] leading-none font-black">午餐</span>
-          <span className="text-[0.7cqw] tracking-widest opacity-80">No.{String(new Date().getDate()).padStart(2, "0")}</span>
+        <div className="flex w-[21%] shrink-0 flex-col items-center justify-center gap-[0.35cqw] border-r-[0.15cqw] border-dashed border-ink/40 bg-brick text-paper-light">
+          <span className="text-[1.05cqw] font-bold tracking-[0.18em]">TODAY</span>
+          <span className="font-[family-name:var(--font-chiron)] text-[2.2cqw] leading-none font-black">午餐</span>
+          <span className="text-[1cqw] font-bold tracking-widest opacity-85">No.{String(new Date().getDate()).padStart(2, "0")}</span>
         </div>
-        <div className="flex min-w-0 flex-1 items-center gap-[0.8cqw] px-[0.9cqw]">
+        <div className="flex min-w-0 flex-1 items-center gap-[0.7cqw] px-[0.8cqw]">
           <Image
             src={optionImage(result)}
             alt=""
             width={180}
             height={150}
-            className="h-auto w-[6.2cqw] shrink-0 object-contain drop-shadow-[0_0.15cqw_0.15cqw_rgb(62_58_53/0.3)]"
+            className="h-auto w-[5.6cqw] shrink-0 object-contain drop-shadow-[0_0.15cqw_0.15cqw_rgb(62_58_53/0.3)]"
           />
-          <div className="min-w-0 flex-1 pr-[2.6cqw]">
-            <p className="text-[0.8cqw] tracking-[0.2em] whitespace-nowrap text-ink-soft">今天午餐就吃</p>
+          <div className="min-w-0 flex-1 pr-[2.2cqw]">
+            <p className="text-[1.15cqw] font-bold tracking-[0.12em] whitespace-nowrap text-ink-soft">今天午餐就吃</p>
             <p
-              className="poster-title rotate-0! line-clamp-2 leading-[1.15] break-all"
-              style={{ fontSize: `${[...result.name].length > 5 ? 1.45 : 1.9}cqw` }}
+              className="poster-title rotate-0! mt-[0.2cqw] line-clamp-2 leading-[1.12] break-all"
+              style={{ fontSize: `${ticketNameSize([...result.name].length)}cqw` }}
             >
               {result.name}
             </p>
@@ -318,7 +383,7 @@ function DeskTicket({ result }: { result: WheelOption }) {
           className="pointer-events-none absolute -right-[1.6cqw] -bottom-[1.2cqw] h-auto w-[5.4cqw] -rotate-6 drop-shadow-[0_0.15cqw_0_rgb(62_58_53/0.25)]"
         />
         {/* 抽中印章 */}
-        <span className="stamp-in absolute -top-[1.4cqw] -right-[1.2cqw] flex h-[4.4cqw] w-[4.4cqw] rotate-12 items-center justify-center rounded-full border-[0.22cqw] border-brick bg-[#fbf3e2]/85 font-[family-name:var(--font-chiron)] text-[1.3cqw] tracking-[0.1em] font-black text-brick shadow-[inset_0_0_0_0.25cqw_#fbf3e2,inset_0_0_0_0.4cqw_#b5452b]">
+        <span className="stamp-in absolute -top-[1.4cqw] -right-[1.2cqw] flex h-[4.4cqw] w-[4.4cqw] rotate-12 items-center justify-center rounded-full border-[0.22cqw] border-brick bg-[#fbf3e2]/85 font-[family-name:var(--font-chiron)] text-[1.45cqw] tracking-[0.1em] font-black text-brick shadow-[inset_0_0_0_0.25cqw_#fbf3e2,inset_0_0_0_0.4cqw_#b5452b]">
           抽中
         </span>
       </div>
