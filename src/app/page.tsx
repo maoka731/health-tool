@@ -99,22 +99,6 @@ function Hero() {
             className="object-cover object-left sm:object-center"
           />
         </div>
-        {/* 立即上車：平板以上貼在車票右下角 */}
-        <Link
-          href="#entrances"
-          className="absolute top-[66%] left-[43%] hidden -rotate-6 items-center gap-1.5 rounded-full border-2 border-ink bg-brick px-4 py-1.5 font-[family-name:var(--font-chiron)] font-black text-paper-light shadow-[0_3px_0_#3e3a35] outline-[1.5px] outline-offset-[-5px] outline-paper-light/70 outline-dashed transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none sm:inline-flex lg:px-5 lg:py-2 lg:text-lg xl:px-6 xl:py-2.5 xl:text-xl"
-        >
-          ▶ 立即上車
-        </Link>
-      </div>
-      {/* 手機：按鈕放在 Banner 下方 */}
-      <div className="px-4">
-      <Link
-        href="#entrances"
-        className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-full border-2 border-ink bg-brick py-3 font-[family-name:var(--font-chiron)] text-lg font-black text-paper-light shadow-[0_3px_0_#3e3a35] outline-[1.5px] outline-offset-[-5px] outline-paper-light/70 outline-dashed active:translate-y-0.5 active:shadow-none sm:hidden"
-      >
-        ▶ 立即上車
-      </Link>
       </div>
       <a
         href="#entrances"
